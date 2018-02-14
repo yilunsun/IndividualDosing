@@ -85,18 +85,28 @@ List Diagnose::Scoring(Random &ran)
   std::vector <std::vector <double> > llkhd = LogLikelihood(ran);
   std::vector <double> ppot=PosteriorPotential(ran);
   std::vector <int> treesize;
+  std::vector <double> values;
 
-  for(int i=0; i<Sample.size();i++)
+  for(int i=0; i<Sample.size();i++){
     treesize.push_back(Sample[i]->GetSize());
+    List templist = Sample[i]->GetVal();
+    values.push_back(templist[1]);
+  };
+    
 
   int which_max=std::distance(ppot.begin(),std::min_element(ppot.begin(),ppot.end()));
+  int val_max=std::distance(values.begin(),std::min_element(values.begin(),values.end()));
 
   List MAPtree = Sample[which_max]->DumpDotFile();
+  List OptTree = Sample[val_max]->DumpDotFile();
+  std::vector <int> label_opt = Sample[val_max]->GetVal()[0];
 
   return List::create(Named("loglikelihood")=llkhd,
                       Named("posteriorpotential")=ppot,
                       Named("treesize")=treesize,
-                      Named("MAPtree")=MAPtree);
+                      Named("MAPtree")=MAPtree,
+                      Named("OptTree")=OptTree,
+                      Named("label_opt")=label_opt);
 };
 
 

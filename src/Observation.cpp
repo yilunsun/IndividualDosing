@@ -2,11 +2,12 @@
 #include "Observation.h"
 
 //constructor
-Observation::Observation(const NumericMatrix &x, const IntegerVector &y, const int &cat_num)
+Observation::Observation(const NumericMatrix &x, const IntegerVector &y, const int &cat_num, const NumericMatrix &V)
 {
 	this->x = x;
   this->y = y;
   this->cat_num = cat_num;
+  this->V = V;
 
   this->n = x.nrow();
   this->p = x.ncol();

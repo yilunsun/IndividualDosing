@@ -35,9 +35,13 @@ using namespace std;
 
 // [[Rcpp::export]]
 List BayesianCART(NumericMatrix x, IntegerVector y, int cat_num, bool standardization, int burnin, int Length, int every, int nChain,
-                  double size, double shape, //std::vector <double> importance_weight,
+                  double size, double shape, NumericMatrix V,
                   String prior_leaf = "uniform", int MinimumLeafSize=1, unsigned int seed=123)
 {
+  if (V.ncol() != (cat_num + 1) ){
+    Rcout<<"Input value matrix is wrong!\n"<<endl;
+  }
+  
   Random ran(seed);
 
   if (standardization) {
@@ -48,7 +52,7 @@ List BayesianCART(NumericMatrix x, IntegerVector y, int cat_num, bool standardiz
 
   List Result;
 
-  Observation obs(x,y,cat_num);
+  Observation obs(x,y,cat_num,V);
   std::vector <NodeTree *> Sample;
 
   int p = obs.GetP();

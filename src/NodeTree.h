@@ -37,6 +37,7 @@ class NodeTree : public Node
 
   int GetSize() const;
   std::vector <Node *> GetLeaves();
+  List GetVal(); //get value of a tree and optimal label for each node
   std::vector <std::vector <double> > GetLeavesObservations();
   std::vector <std::vector <int> > GetLeavesSubjects();
 

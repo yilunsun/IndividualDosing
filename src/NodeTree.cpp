@@ -94,102 +94,6 @@ NodeTree* NodeTree::CopyTree(void) const
 	return NewTree;
 };
 
-/*
-int NodeTree::CheckConsistency(void) const
-{
-// Return some debugging information;
-NodeTree *Tree=this->CopyTree();
-vector <Node *> node;
-node.push_back(Tree);
-vector <Node *> leaves;
-int i,j;
-int size=0, error=0;
-if (obs->IsCategoricalResponse())
-cout<<"0/1 in leaves:"<<endl;
-for (i=0;i<node.size();i++)
-{
-if (node[i]->GetRightNode()==NULL)
-{
-leaves.push_back(node[i]);
-
-vector<int> subject(node[i]->GetSubjectList());
-const Observation *obs = node[i]->GetObservation();
-if (obs->IsCategoricalResponse())
-{
-int s1 = 0;
-int s2 = 0;
-int l = subject.size();
-int s;
-
-for (s = 0; s < l; s++)
-{
-int nr = subject[s];
-if (obs->GetY(nr)==1) s1++;
-if (obs->GetY(nr)==0) s2++;
-};
-size=size+s1+s2;
-if (s1<s2) error+=s1;
-else
-error+=s2;
-cout<<s1<<"/"<<s2<<"\t";
-};
-}
-else
-{
-node.push_back(node[i]->GetRightNode());
-node.push_back(node[i]->GetLeftNode());
-};
-
-};
-
-// Print current tree to file.
-if (obs->IsCategoricalResponse()) cout<<endl<<"Error Rate "<<((double) error)/size<<endl<<endl;
-ifstream in;
-ofstream out;
-
-in.open("Results.txt");
-if (in.fail())
-{
-in.close();
-out.open("Results.txt");
-}
-else
-{
-in.close();
-out.open("Results.txt",ios::out | ios::app);
-};
-out<<"******************************************************************"<<endl;
-out<<"There are totally  "<<leaves.size()<<" leaves"<<endl;
-for (i=0;i<leaves.size();i++)
-out<<"Number of size in leaf "<<i<<" is "<<leaves[i]->GetSubjectList().size()<<endl;
-out<<endl;
-for (i=0;i<node.size();i++)
-{
-out<<"The splitting variables for node "<<i<<" is "<<node[i]->GetSplitVariable();
-if (node[i]->GetRightNode()==NULL) out<<", a leaf";
-else
-out<<",\t the splitting threshold is "<<node[i]->GetSplitLevel();
-out<<endl;
-};
-for (j=0;j<leaves.size();j++)
-{
-out<<endl<<"In leaf "<<j<<":\t";
-for (i=0;i<leaves[j]->GetSubjectList().size();i++)
-out<<leaves[j]->GetSubjectList()[i]<<"\t";
-out<<endl;
-};
-out<<endl;
-out.close();
-
-
-Tree->RemoveSubTree();
-delete Tree;
-Tree=NULL;
-return 1; // return true so far
-};
-*/
-
-
 double NodeTree::Pot(const Model &modelStructure, const Model &modelVar,  const Model &modelLikelihood, Random &ran)
 {
 	double pot=0;
@@ -257,6 +161,59 @@ std::vector <Node *> NodeTree::GetLeaves()
 		};
 	};
 	return leaves;
+};
+
+List NodeTree::GetVal()
+{
+  double value = 0;
+  std::vector <int> label;
+  
+  NodeTree *Tree=this->CopyTree();
+  std::vector <Node *> node;
+  node.push_back(Tree);
+  std::vector <Node *> leaves;
+  int i;
+  
+  for (i=0;i<node.size();i++)
+  {
+    if (node[i]->GetRightNode()==NULL)
+    {
+      leaves.push_back(node[i]);
+    }
+    else
+    {
+      node.push_back(node[i]->GetLeftNode());
+      node.push_back(node[i]->GetRightNode());
+    };
+  };
+  
+  for (i=0;i<leaves.size();i++) //loop through leaves
+  {
+    std::vector <int> SubjectList=leaves[i]->GetSubjectList();
+    
+    double max = 0;
+    int opt = 0;
+    for (int k = 0; k < (obs->GetNumCats()+1); k++) //loop through treatments
+    {
+      double temp = 0;
+      for (int j=0; j<SubjectList.size(); j++){
+        temp = temp + obs->GetV(SubjectList[j], k);
+      };
+      if (temp > max) {
+        opt = k;
+        max = temp;
+      };
+    };
+    label.push_back(opt);
+    value = value + max;
+  };
+  
+  delete Tree;
+  leaves.clear();
+  node.clear();
+  
+  return List::create(Named("label")=label,
+                      Named("value")=value);
 };
 
 std::vector <std::vector <double> > NodeTree::GetLeavesObservations()

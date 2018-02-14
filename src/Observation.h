@@ -14,7 +14,7 @@ using namespace Rcpp;
 class Observation
 {
  public:
-  Observation(const NumericMatrix &x, const IntegerVector &y, const int &cat_num);
+  Observation(const NumericMatrix &x, const IntegerVector &y, const int &cat_num, const NumericMatrix &V);
   Observation();
   ~Observation(void);
 
@@ -23,6 +23,7 @@ class Observation
   int GetK(void) const {return k;};
   int GetY(int i) const {return y[i];};
   double GetX(int i,int j) const {return x(i,j);};
+  double GetV(int i,int j) const {return V(i,j);};
   int GetNumCats(void) const {return cat_num;}; //number of categorical variables
   void Show();
   void SummaryStat();
@@ -35,6 +36,7 @@ class Observation
   IntegerVector y;
   NumericMatrix x;
   int cat_num;
+  NumericMatrix V;// value matrix
 };
 
 #endif
