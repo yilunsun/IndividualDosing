@@ -38,10 +38,6 @@ List BayesianCART(NumericMatrix x, IntegerVector y, int cat_num, bool standardiz
                   double size, double shape, NumericMatrix V,
                   String prior_leaf = "uniform", int MinimumLeafSize=1, unsigned int seed=123)
 {
-  if (V.ncol() != (cat_num + 1) ){
-    Rcout<<"Input value matrix is wrong!\n"<<endl;
-  }
-  
   Random ran(seed);
 
   if (standardization) {
@@ -148,7 +144,7 @@ List BayesianCART(NumericMatrix x, IntegerVector y, int cat_num, bool standardiz
       for (int kk = 1; kk <= every; kk++)
       {
         tree = mcmc.Iterate(tree,proposal1,25,nAcc,ran);
-        tree = mcmc.Iterate(tree,proposal2,1,nAcc,ran);
+        tree = mcmc.Iterate(tree,proposal2,10,nAcc,ran);
         tree = mcmc.Iterate(tree,proposal1,25,nAcc,ran);
       }
       if (i>=burnin)

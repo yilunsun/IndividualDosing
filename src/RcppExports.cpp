@@ -5,19 +5,33 @@
 
 using namespace Rcpp;
 
-// rcpp_hello_world
-List rcpp_hello_world();
-RcppExport SEXP _BayesTreeMCMC_rcpp_hello_world() {
+// BayesianCART
+List BayesianCART(NumericMatrix x, IntegerVector y, int cat_num, bool standardization, int burnin, int Length, int every, int nChain, double size, double shape, NumericMatrix V, String prior_leaf, int MinimumLeafSize, unsigned int seed);
+RcppExport SEXP _BayesTreeMCMC_BayesianCART(SEXP xSEXP, SEXP ySEXP, SEXP cat_numSEXP, SEXP standardizationSEXP, SEXP burninSEXP, SEXP LengthSEXP, SEXP everySEXP, SEXP nChainSEXP, SEXP sizeSEXP, SEXP shapeSEXP, SEXP VSEXP, SEXP prior_leafSEXP, SEXP MinimumLeafSizeSEXP, SEXP seedSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(rcpp_hello_world());
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< int >::type cat_num(cat_numSEXP);
+    Rcpp::traits::input_parameter< bool >::type standardization(standardizationSEXP);
+    Rcpp::traits::input_parameter< int >::type burnin(burninSEXP);
+    Rcpp::traits::input_parameter< int >::type Length(LengthSEXP);
+    Rcpp::traits::input_parameter< int >::type every(everySEXP);
+    Rcpp::traits::input_parameter< int >::type nChain(nChainSEXP);
+    Rcpp::traits::input_parameter< double >::type size(sizeSEXP);
+    Rcpp::traits::input_parameter< double >::type shape(shapeSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type V(VSEXP);
+    Rcpp::traits::input_parameter< String >::type prior_leaf(prior_leafSEXP);
+    Rcpp::traits::input_parameter< int >::type MinimumLeafSize(MinimumLeafSizeSEXP);
+    Rcpp::traits::input_parameter< unsigned int >::type seed(seedSEXP);
+    rcpp_result_gen = Rcpp::wrap(BayesianCART(x, y, cat_num, standardization, burnin, Length, every, nChain, size, shape, V, prior_leaf, MinimumLeafSize, seed));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_BayesTreeMCMC_rcpp_hello_world", (DL_FUNC) &_BayesTreeMCMC_rcpp_hello_world, 0},
+    {"_BayesTreeMCMC_BayesianCART", (DL_FUNC) &_BayesTreeMCMC_BayesianCART, 14},
     {NULL, NULL, 0}
 };
 
