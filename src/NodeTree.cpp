@@ -476,10 +476,10 @@ NumericVector NodeTree::seq_length(const double& start, const double& end, const
 NumericVector NodeTree::dirtyGBM(const NumericMatrix& x, const NumericVector& y, const NumericMatrix& newdf){ // this implementation requires expose predict in xgboost package as predict2
   
   // Obtain environment containing function
-  Rcpp::Environment package_env("package:xgboost2"); 
+  Rcpp::Environment package_env("package:xgboost"); 
   
   // Make function callable from C++
-  Rcpp::Function xgbm = package_env["xgboost2"];  
+  Rcpp::Function xgbm = package_env["xgboost"];  
   Rcpp::Function predict2 = package_env["predict2"]; 
   
   // Call the function and receive output (might not be list)
