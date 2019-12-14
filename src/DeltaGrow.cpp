@@ -32,11 +32,13 @@ NodeTree *DeltaGrow::PerformChange(NodeTree *tree) const
   NewLeft->SetObservation(pp->GetObservation());
   NewLeft->SetSplitVariable(-1);
   NewLeft->SetMinimumLeafSize(pp->GetMinimumLeafSize());
+  NewLeft->SetMinLeaf(pp->GetMinLeaf());
 
   Node *NewRight = new Node;
   NewRight->SetObservation(pp->GetObservation());
   NewRight->SetSplitVariable(-1);
   NewRight->SetMinimumLeafSize(pp->GetMinimumLeafSize());
+  NewRight->SetMinLeaf(pp->GetMinLeaf());
 
   pp->SetLeftNode(NewLeft);  pp->SetRightNode(NewRight);
   pp->SetSplitVariable(newVar);

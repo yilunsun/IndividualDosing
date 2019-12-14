@@ -100,7 +100,7 @@ NodeTree *ModelTreeStructurePinBall::Simulate(Random &ran, Observation *obs, int
 	//int nLeaf=1; //Starting from root;
 	NodeTree *root = new NodeTree(obs);
 	int i;
-	Rcout<<"Number of leaves: "<<nLeaf<<endl;
+	//Rcout<<"Number of leaves: "<<nLeaf<<endl;
 	std::vector<Node *> node;
 	std::vector<int> size;
 	node.push_back(root);

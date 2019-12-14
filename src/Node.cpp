@@ -83,6 +83,7 @@ Node* Node::Copy(void) const
   NewNode->SetSplittingVar(this->GetSplittingVar());
   NewNode->SetSubjectList(this->GetSubjectList());
   NewNode->SetMinimumLeafSize(this->GetMinimumLeafSize());
+  NewNode->SetMinLeaf(this->GetMinLeaf());
   //NewNode->SetParentNode(this->GetParentNode());
   return NewNode;
 };
@@ -96,6 +97,7 @@ Node* Node::CopySubTree(void) const
   NewNode->SetSubjectList(this->GetSubjectList());
   NewNode->SetSplittingVar(this->GetSplittingVar());
   NewNode->SetMinimumLeafSize(this->GetMinimumLeafSize());
+  NewNode->SetMinLeaf(this->GetMinLeaf());
   if (this->GetLeftNode()!=NULL || this->GetRightNode()!=NULL)
   {
     Node* pLeft=this->GetLeftNode()->CopySubTree();
@@ -106,6 +108,17 @@ Node* Node::CopySubTree(void) const
 
   return NewNode;
 }
+
+void Node::SetAllMinLeaf(int numberINleaf) 
+{
+  this->SetMinLeaf(numberINleaf);
+  
+  if (this->GetLeftNode()!=NULL || this->GetRightNode()!=NULL)//internal node
+  {
+    this->GetLeftNode()->SetAllMinLeaf(numberINleaf);
+    this->GetRightNode()->SetAllMinLeaf(numberINleaf);
+  }
+};
 
 void Node::SetParentNode(Node *node)
 {

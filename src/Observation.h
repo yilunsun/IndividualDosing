@@ -6,7 +6,8 @@
 
 #include <vector>
 #include <string>
-#include <Rcpp.h>
+#include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppArmadillo)]]
 
 using namespace std;
 using namespace Rcpp;
@@ -14,7 +15,7 @@ using namespace Rcpp;
 class Observation
 {
  public:
-  Observation(const NumericMatrix &x, const IntegerVector &y, const int &cat_num, const NumericMatrix &V);
+  Observation(const NumericMatrix& xo, const NumericMatrix& x, const IntegerVector& y, const int& cat_num, const NumericVector& V, const NumericVector& a, const NumericVector& candidate_dose);
   Observation();
   ~Observation(void);
 
@@ -23,7 +24,10 @@ class Observation
   int GetK(void) const {return k;};
   int GetY(int i) const {return y[i];};
   double GetX(int i,int j) const {return x(i,j);};
-  double GetV(int i,int j) const {return V(i,j);};
+  NumericVector GetXi(int i) const {return xo(i,_);};
+  double GetV(int i) const {return V[i];};
+  double GetA(int i) const {return a[i];};
+  NumericVector GetCanDose(void) const {return candidate_dose;};
   int GetNumCats(void) const {return cat_num;}; //number of categorical variables
   void Show();
   void SummaryStat();
@@ -35,8 +39,12 @@ class Observation
 
   IntegerVector y;
   NumericMatrix x;
+  NumericMatrix xo;
   int cat_num;
-  NumericMatrix V;// value matrix
+  NumericVector V;// value vector
+  NumericVector a;//observed dose
+  NumericVector candidate_dose;
+
 };
 
 #endif

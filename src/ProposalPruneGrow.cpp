@@ -32,6 +32,7 @@ ProposalPruneGrow::~ProposalPruneGrow(void)
 Delta *ProposalPruneGrow::ProposeChange(const NodeTree &tree,double &potential,
 										Random &ran) const
 {
+  //tree.checkTree();
 	if (tree.GetRightNode() == NULL)    // no interior nodes exist!
 	{                                 // Grow the tree
 		NodeTree *newTree = tree.CopyTree();
@@ -43,6 +44,8 @@ Delta *ProposalPruneGrow::ProposeChange(const NodeTree &tree,double &potential,
 		NewRight->SetSplitVariable(-1);
 		NewLeft->SetMinimumLeafSize(newTree->GetMinimumLeafSize());
 		NewRight->SetMinimumLeafSize(newTree->GetMinimumLeafSize());
+		NewLeft->SetMinLeaf(newTree->GetMinLeaf());
+		NewRight->SetMinLeaf(newTree->GetMinLeaf());
 		newTree->SetLeftNode(NewLeft); newTree->SetRightNode(NewRight);
 
 		// Set splitting variables and splitting rules.
@@ -89,8 +92,8 @@ Delta *ProposalPruneGrow::ProposeChange(const NodeTree &tree,double &potential,
 	//
 
 	double coin=ran.Unif01();
-
-	if (coin<=0.5)
+	
+	if (coin<=0.7)
 		// In the case where grow move is refrained, we need to change this value to larger one so that grow move will be encouraged.
 		// || tree.GetSize()==10) // Just for test CAUTION!!!! Don't leave this code here!!!!
 	{
@@ -102,32 +105,34 @@ Delta *ProposalPruneGrow::ProposeChange(const NodeTree &tree,double &potential,
 	  std::vector<const Node *> leaves;
 
 		node.push_back(&tree);
-		int i;
-		for (i = 0; i < node.size(); i++)
+		
+		for (int i = 0; i < node.size(); i++)
 		{
+		  //Rcout<<"now node Minleaf: "<<node[i]->GetMinLeaf()<<"\t";
 			if (node[i]->GetRightNode()==NULL)
-				leaves.push_back(node[i]);
-			else
+			{
+			  leaves.push_back(node[i]);
+			} else
 			{
 				node.push_back(node[i]->GetRightNode());
 				node.push_back(node[i]->GetLeftNode());
 			};
 		};
-
-
-
+		
 		std::vector<double> pr = std::vector<double>(leaves.size(),1.0/leaves.size());
 		int nr = ran.Discrete(pr);  // i.e. propose new rule for this node
-
+		
 		Node *NewNode = leaves[nr]->Copy();
 		Node *NewLeft=new Node;
 		NewLeft->SetObservation(leaves[nr]->GetObservation());
 		NewLeft->SetSplitVariable(-1);
 		NewLeft->SetMinimumLeafSize(leaves[nr]->GetMinimumLeafSize());
+		NewLeft->SetMinLeaf(leaves[nr]->GetMinLeaf());
 		Node *NewRight=new Node;
 		NewRight->SetSplitVariable(-1);
 		NewRight->SetObservation(leaves[nr]->GetObservation());
 		NewRight->SetMinimumLeafSize(leaves[nr]->GetMinimumLeafSize());
+		NewRight->SetMinLeaf(leaves[nr]->GetMinLeaf());
 
 		NewNode->SetLeftNode(NewLeft);
 		NewNode->SetRightNode(NewRight);
@@ -137,7 +142,7 @@ Delta *ProposalPruneGrow::ProposeChange(const NodeTree &tree,double &potential,
 		node.push_back(&tree);
 		std::vector<const Node *> Possible;
 
-		for (i = 0; i < node.size(); i++)
+		for (int i = 0; i < node.size(); i++)
 		{
 			if (node[i]->GetRightNode()!=NULL)
 			{

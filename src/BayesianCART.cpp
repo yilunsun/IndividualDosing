@@ -1,8 +1,9 @@
-#include <Rcpp.h>
+#include <RcppArmadillo.h>
+// [[Rcpp::depends("RcppArmadillo")]]
 // [[Rcpp::plugins("cpp11")]]
 #include <string>
 #include <vector>
-
+#include "NodeTree.h"
 #include "Observation.h"
 #include "Random.h"
 #include "Density.h"
@@ -18,7 +19,6 @@
 
 
 #include "MCMC.h"
-#include "NodeTree.h"
 #include "DensityDirichlet.h"
 #include "DensityUnif.h"
 #include "DensityDummy.h"
@@ -29,17 +29,27 @@ using namespace Rcpp;
 using namespace std;
 
 //only works on classification problems
-//cat_num is number of dummy indicators. They are required to be placed on the left of data matrix, and coded as integer vector 0,1,2,...etc.
+//cat_num is number of dummy indicators on the left of data matrix, and coded as binary 1/0.
 //x needs to be standardized to be in [0,1], taking equal sign when there is dummy
-//y needs to be coded as an integer vector 0,1,2,...etc.
+//y is the vector of initialized doses, required for prior.
+//V is the observed reward, called y in most cases.
+//candidate_dose is the vector of candidate dose levels - from which to choose from.
+//MinimumLeafSize always is 1
+//MinLeaf is the minimum leaf node size.
 
 // [[Rcpp::export]]
-List BayesianCART(NumericMatrix x, IntegerVector y, int cat_num, bool standardization, int burnin, int Length, int every, int nChain,
-                  double size, double shape, NumericMatrix V,
-                  String prior_leaf = "uniform", int MinimumLeafSize=1, unsigned int seed=123)
+List BayesianCART(NumericMatrix x, // baseline covariate
+                  IntegerVector y, // categorized initial dose level: 0, 1, 2,...,8 -> 0.1, ..., 0.9; can be random or previous estimation of optimal dose level
+                  NumericVector V, // V is observed reward
+                  NumericVector a, // a is observed dose level: 0.1 - 0.9
+                  NumericVector candidate_dose, // the dose levels to choose from
+                  int cat_num, bool standardization, int burnin, int Length, int every, int nChain,
+                  double size, double shape, 
+                  String prior_leaf = "uniform", int MinimumLeafSize=1, unsigned int seed=123, int MinLeaf=30)
 {
   Random ran(seed);
-
+  NumericMatrix xo = x;//original data
+  
   if (standardization) {
     for (int i=cat_num;i<x.ncol();i++){
       x( _, i) = (x( _, i)-Rcpp::min(x( _, i)))/(Rcpp::max(x( _, i)) - Rcpp::min(x( _, i)));
@@ -48,11 +58,11 @@ List BayesianCART(NumericMatrix x, IntegerVector y, int cat_num, bool standardiz
 
   List Result;
 
-  Observation obs(x,y,cat_num,V);
+  Observation obs(xo,x,y,cat_num,V,a,candidate_dose);
   std::vector <NodeTree *> Sample;
 
-  int p = obs.GetP();
-  int cat = obs.GetK();
+  int p = obs.GetP();//number of predictors
+  int cat = obs.GetK();// number of dose levels to choose from
 
   //this is used in splitting proposal, default set to equal
   //delete in future
@@ -100,19 +110,23 @@ List BayesianCART(NumericMatrix x, IntegerVector y, int cat_num, bool standardiz
   ModelLikelihoodMultinomial mLikelihood(alpha,cat);
   DensityDirichlet dDensity(alpha,cat);
 
-  for (int l = 0; l < nChain; l++) // For final data analysis, we just run one long chain.
+  for (int l = 0; l < nChain; l++) 
   {
-    Rcout<<"Chain #"<<l+1<<endl;
+    //Rcout<<"Chain #"<<l+1<<endl;
+    
     NodeTree *tree = mTreeStructure.Simulate(ran, &obs, 1);
     tree->SetMinimumLeafSize(MinimumLeafSize);
-    mSplitVariable.Simulate(*tree,ran); // When reading tree from external file, comment this line.
+    tree->SetAllMinLeaf(MinLeaf);
+    mSplitVariable.Simulate(*tree,ran); 
     tree->SetObservation(&obs);
-
-    while (!tree->UpdateSubjectList()){
+    
+    while (!(tree->UpdateSubjectList() && tree->GetMiniNodeSize() >= MinLeaf)){
       mSplitVariable.Simulate(*tree,ran);
     }
-
-    Rcout<<"Initialization Completed."<<endl;
+    //tree->checkTree();
+    
+    //Rcout<<"Initial Tree has a minimum node size: "<<tree->GetMiniNodeSize()<<"\n";
+    //Rcout<<"Initialization Completed."<<endl;
 
     //
     // Initialise the proposal and MCMC classes
@@ -122,6 +136,7 @@ List BayesianCART(NumericMatrix x, IntegerVector y, int cat_num, bool standardiz
     proposal1.push_back(new ProposalChange(prob,density));
     proposal1.push_back(new ProposalPruneGrow(prob, density));
     proposal1.push_back(new ProposalSwap());
+    proposal1.push_back(new ProposalPruneGrow(prob, density));
 
     std::vector<Proposal *> proposal2;
     ChangeLeavesIdentity noChange;
@@ -136,16 +151,18 @@ List BayesianCART(NumericMatrix x, IntegerVector y, int cat_num, bool standardiz
     for (int i = 0; i < Length; i++)
     {
 
-      if (i%50==0)
-        Rcout<<"Iteration: "<<i<<endl;
+      // if (i%50==0)
+      //   Rcout<<"Iteration: "<<i<<endl;
+      //Rcout<<"Now the Tree has a minimum node size: "<<tree->GetMiniNodeSize()<<"\n";
 
       std::vector<int> nAcc;
 
       for (int kk = 1; kk <= every; kk++)
       {
-        tree = mcmc.Iterate(tree,proposal1,25,nAcc,ran);
-        tree = mcmc.Iterate(tree,proposal2,10,nAcc,ran);
-        tree = mcmc.Iterate(tree,proposal1,25,nAcc,ran);
+        tree = mcmc.Iterate(tree,proposal1,250,nAcc,ran);
+        tree = mcmc.Iterate(tree,proposal2,50,nAcc,ran);
+        tree = mcmc.Iterate(tree,proposal1,250,nAcc,ran);
+        tree = mcmc.Iterate(tree,proposal2,50,nAcc,ran);
       }
       if (i>=burnin)
       {
@@ -153,11 +170,13 @@ List BayesianCART(NumericMatrix x, IntegerVector y, int cat_num, bool standardiz
         Sample.push_back(temp);
       };
     };
+    //Rcout<<"Evaluating each tree, please be patient."<<endl;
     Diagnose Diag(Sample, dDensity, mTreeStructure, mSplitVariable, mLikelihood);
+    
     std::string I=std::to_string(l);
     std::string chainname="chain"+I;
     Result[chainname]=Diag.Scoring(ran);
-
+    
     delete tree;
     for (int k=0;k<proposal1.size();k++)
       delete proposal1[k];

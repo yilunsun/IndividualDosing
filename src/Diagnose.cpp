@@ -1,12 +1,13 @@
 #include <string>
 #include <algorithm>
+#include "NodeTree.h"
 #include "Random.h"
 #include "Observation.h"
 #include "Model.h"
 
 #include "ModelLikelihoodMultinomial.h"
 #include "Density.h"
-#include "NodeTree.h"
+
 #include "Diagnose.h"
 
 
@@ -72,39 +73,47 @@ Diagnose::~Diagnose()
 List Diagnose::Scoring(Random &ran)
 {
   std::vector <int> Observees;
-
+  
   // Sort tree first
   this->Sort(ran);
-
+  
   // Select observees.
   // Modified on Dec 11th. To add only a few observees. Changed from Sample[0]->GetObservation()->GetN() to 4
 
   for (int i=0;i<Sample[0]->GetObservation()->GetN();i++)
     Observees.push_back(i);
-
+  
   std::vector <std::vector <double> > llkhd = LogLikelihood(ran);
+  
   std::vector <double> ppot=PosteriorPotential(ran);
   std::vector <int> treesize;
+  std::vector <int> MinimumLeafNode;
   std::vector <double> values;
 
   for(int i=0; i<Sample.size();i++){
+    
     treesize.push_back(Sample[i]->GetSize());
+    MinimumLeafNode.push_back(Sample[i]->GetMiniNodeSize());
     List templist = Sample[i]->GetVal();
+    if (templist[2]) {
+      return templist[0];
+    }
     values.push_back(templist[1]);
   };
-    
-
+  
   int which_max=std::distance(ppot.begin(),std::min_element(ppot.begin(),ppot.end()));
   int val_max=std::distance(values.begin(),std::min_element(values.begin(),values.end()));
-
-  List MAPtree = Sample[which_max]->DumpDotFile();
+  
+  //List MAPtree = Sample[which_max]->DumpDotFile();
   List OptTree = Sample[val_max]->DumpDotFile();
   std::vector <int> label_opt = Sample[val_max]->GetVal()[0];
 
-  return List::create(Named("loglikelihood")=llkhd,
-                      Named("posteriorpotential")=ppot,
+  return List::create(//Named("loglikelihood")=llkhd,
+                      //Named("posteriorpotential")=ppot,
                       Named("treesize")=treesize,
-                      Named("MAPtree")=MAPtree,
+                      Named("MinimumLeafNode")=MinimumLeafNode,
+                      //Named("MAPtree")=MAPtree,
+                      Named("values")=values,
                       Named("OptTree")=OptTree,
                       Named("label_opt")=label_opt);
 };

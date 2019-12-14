@@ -8,7 +8,8 @@
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
-#include <Rcpp.h>
+#include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppArmadillo)]]
 using namespace std;
 using namespace Rcpp;
 

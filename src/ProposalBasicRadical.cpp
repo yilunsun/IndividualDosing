@@ -84,7 +84,7 @@ Delta * ProposalBasicRadical::ProposeChange(const NodeTree &tree, double &potent
 	std::vector <std::vector <std::vector <int> > > LeavesList;
 
 	NewTree->SetMinimumLeafSize(tree.GetMinimumLeafSize());
-
+	NewTree->SetMinLeaf(tree.GetMinLeaf());
 	//ShowLeaves(Leaves);
 
 	if (Leaves.empty())    // no interior nodes exist!
@@ -226,6 +226,8 @@ Delta * ProposalBasicRadical::ProposeChange(const NodeTree &tree, double &potent
 			Left->SetSubjectList(NewLeftSubjectList);
 			Right->SetMinimumLeafSize(node[i]->GetMinimumLeafSize());
 			Left->SetMinimumLeafSize(node[i]->GetMinimumLeafSize());
+			Right->SetMinLeaf(node[i]->GetMinLeaf());
+			Left->SetMinLeaf(node[i]->GetMinLeaf());
 			node[i]->SetLeftNode(Left);
 			node[i]->SetRightNode(Right);
 			node.push_back(Left);

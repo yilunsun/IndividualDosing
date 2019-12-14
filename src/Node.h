@@ -5,7 +5,8 @@
 #define _DIAGRAMS_NODE_H
 
 #include <vector>
-#include <Rcpp.h>
+#include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppArmadillo)]]
 #include "Observation.h"
 
 using namespace std;
@@ -18,7 +19,7 @@ class Node
 public:
 	Node(void);
 	virtual ~Node(void);
-
+	void SetAllMinLeaf(int numberINleaf);
 	void SetObservation(const Observation* obs);  // set local variable obs for this
 	// node and for all descendent nodes
 	// I change the reference to pointer.
@@ -52,17 +53,21 @@ public:
 	void ExcSplittingVar(int x);
 	void SetSubjectList(std::vector <int> SubjectList);
 	void SetMinimumLeafSize(int LeafSize) { MinimumLeafSize=LeafSize; };
+	void SetMinLeaf(int MLeafSize) { MinLeaf=MLeafSize; };
 	int GetMinimumLeafSize() const { return MinimumLeafSize; };
+	int GetMinLeaf() const { return MinLeaf; };
 	bool UpdateSubjectList(void);  // update the subject lists for all
 	// descendents of this node
 
 	List DumpDotFile(void);
+	
 
 	std::vector <double> GetSubjectObs();
 
 	void CheckConsistency(void) const; //debugging
 
 protected:
+  int MinLeaf;
 	const Observation *obs;
   std::vector <int> SubjectList;
   std::vector <int> Splitting_var; // variables available for splitting

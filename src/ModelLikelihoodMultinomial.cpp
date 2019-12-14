@@ -65,7 +65,7 @@ double ModelLikelihoodMultinomial::IntApprox(std::vector <double> Y, Random &ran
 
     int i;
 
-    for (i=0; i<k; i++)
+    for (i=0; i<this->k; i++)
     {
         int count=0;
 
@@ -118,20 +118,16 @@ double ModelLikelihoodMultinomial::Potential(const NodeTree &tree,Random &ran) c
 
             int l = subject.size();
 
-            int s;
+            //std::vector <int> Y;
 
-            std::vector <double> Y;
-
-            int j;
-
-            for (j=0; j<k; j++)
+            for (int j=0; j< this->k; j++)
             {
                 int count = 0;
 
-                for (s = 0; s < l; s++)
+                for (int s = 0; s < l; s++)
                 {
                     int nr = subject[s];
-                    Y.push_back(obs->GetY(nr));
+                    //Y.push_back(obs->GetY(nr));
                     if (obs->GetY(nr)==j) count++;
                 }
 
@@ -143,15 +139,15 @@ double ModelLikelihoodMultinomial::Potential(const NodeTree &tree,Random &ran) c
 
             //double pottemp=IntApprox(Y, ran);
 
-            for (j=0;j<k;j++)
+            for (int j=0;j< this->k;j++)
             {
-                for (s=0;s<s1[j];s++)
+                for (int s=0;s<s1[j];s++)
                 {
                     pot += -log(alpha[j] + s);
                 }
             }
 
-            for (s=0;s<l;s++)
+            for (int s=0;s<l;s++)
                 pot -= -log(std::accumulate(alpha.begin(), alpha.end(), 0.0)+s);
 
         }
@@ -282,11 +278,13 @@ double ModelLikelihoodMultinomial::PotentialDifferenceGrow(const Node *oldLeaf,i
     newLeft->SetObservation(obs);
     newLeft->SetSplitVariable(-1);
     newLeft->SetMinimumLeafSize(oldLeaf->GetMinimumLeafSize());
+    newLeft->SetMinLeaf(oldLeaf->GetMinLeaf());
 
     Node *newRight = new Node;
     newRight->SetObservation(obs);
     newRight->SetSplitVariable(-1);
     newRight->SetMinimumLeafSize(oldLeaf->GetMinimumLeafSize());
+    newRight->SetMinLeaf(oldLeaf->GetMinLeaf());
 
     newInterior->SetLeftNode(newLeft);  newInterior->SetRightNode(newRight);
     newInterior->SetSplitVariable(newVar);

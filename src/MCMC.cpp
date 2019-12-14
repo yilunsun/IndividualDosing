@@ -1,4 +1,3 @@
-#include <cmath>
 #include "Random.h"
 #include "Observation.h"
 #include "Density.h"
@@ -37,40 +36,53 @@ NodeTree *MCMC::Iterate(NodeTree *tree,std::vector<Proposal *> proposal,
 						Random &ran) const
 {
 
-	int j;
 	nAccept.resize(proposal.size());
-	for (j = 0; j < nAccept.size(); j++) nAccept[j] = 0;
+	for (int j = 0; j < nAccept.size(); j++) nAccept[j] = 0;
 
-	int i;
-	for (i = 0; i < numberOfIteration; i++)
+	for (int i = 0; i < numberOfIteration; i++)
 	{
-		int j;
-		for (j = 0; j < proposal.size(); j++)
+	  //Rcout<<"In "<<i<<"-th iteration: \n";
+		for (int j = 0; j < proposal.size(); j++)
 		{
+		  //Rcout<<"In "<<j<<"-th proposal:" <<tree->GetMiniNodeSize()<<"\n";
 			double pot = 0.0;
 			Delta *delta = proposal[j]->ProposeChange(*tree,pot,ran);
+			//Rcout<<"point 1: "<<tree->GetMiniNodeSize()<<"\n";
 			if (delta!=NULL)
 			{
 				pot += priorStructure->PotentialDifference(*tree,*delta,ran);
-
-				pot += priorSplit->PotentialDifference(*tree,*delta,ran);
-
+			  pot += priorSplit->PotentialDifference(*tree,*delta,ran);
 				pot += like->PotentialDifference(*tree,*delta,ran);
-
+				//Rcout<<"point 2: "<<tree->GetMiniNodeSize()<<"\n";
+        if (pot < 0) pot = 0;
+        //if (pot > 4) pot = pot/50; 
+        //Rcout<<"aplha: "<<exp(- pot)<<"\t";
 				if (ran.Unif01() <= exp(- pot))
 				{
-					nAccept[j]++;
-					tree = delta->PerformChange(tree);
-					// For debugging only
-					// Dump trees
-					//string tempFilename("../temptree.txt");
-					//tree->DumpDotFile(tempFilename, 0);
-				}
+				  //Rcout<<"successful! \n";
+					nAccept[j]++;//Rcout<<"success #: "<<nAccept[j]<<"\n";
+					
+					//keep a copy of temporary
+					NodeTree *tree_temp=tree->CopyTree();//Rcout<<"3. tree_temp: "<<tree_temp->GetMiniNodeSize()<<"\n";Rcout<<"3. tree: "<<tree->GetMiniNodeSize()<<"\n";
+					tree = delta->PerformChange(tree);//想·Rcout<<"4. tree_temp: "<<tree_temp->GetMiniNodeSize()<<"\n";Rcout<<"4. tree: "<<tree->GetMiniNodeSize()<<"\n";
+					
+					// decide whether to revert the change
+					if (tree->GetMiniNodeSize() >= tree->GetMinLeaf()) {
+					  //tree = delta->PerformChange(tree);//
+					  //Rcout<<"Success!"<<endl;
+					  delete tree_temp;
+					} else {
+					  delete tree;
+					  tree = tree_temp->CopyTree();
+					};
+					
+					//delete tree_temp;
+				};
 				delete delta;
 				delta=NULL;
 			};
-		}
-	}
+		};
+	};
 
 	return tree;
 };

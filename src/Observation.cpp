@@ -1,18 +1,23 @@
 #include "Random.h"
 #include "Observation.h"
+#include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppArmadillo)]]
+using namespace Rcpp;
 
 //constructor
-Observation::Observation(const NumericMatrix &x, const IntegerVector &y, const int &cat_num, const NumericMatrix &V)
+Observation::Observation(const NumericMatrix& xo, const NumericMatrix& x, const IntegerVector& y, const int& cat_num, const NumericVector& V, const NumericVector& a, const NumericVector& candidate_dose)
 {
+  this->xo = xo;
 	this->x = x;
   this->y = y;
   this->cat_num = cat_num;
   this->V = V;
-
+  this->a = a;
+  this->candidate_dose = candidate_dose;
   this->n = x.nrow();
   this->p = x.ncol();
 
-  this->k = max(y) + 1;
+  this->k = unique(candidate_dose).size();
 };
 
 
