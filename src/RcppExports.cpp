@@ -7,8 +7,8 @@
 using namespace Rcpp;
 
 // BayesianCART
-List BayesianCART(NumericMatrix x, IntegerVector y, NumericVector V, NumericVector a, NumericVector candidate_dose, int cat_num, bool standardization, int burnin, int Length, int every, int nChain, double size, double shape, String prior_leaf, int MinimumLeafSize, unsigned int seed, int MinLeaf);
-RcppExport SEXP _STRLdose_BayesianCART(SEXP xSEXP, SEXP ySEXP, SEXP VSEXP, SEXP aSEXP, SEXP candidate_doseSEXP, SEXP cat_numSEXP, SEXP standardizationSEXP, SEXP burninSEXP, SEXP LengthSEXP, SEXP everySEXP, SEXP nChainSEXP, SEXP sizeSEXP, SEXP shapeSEXP, SEXP prior_leafSEXP, SEXP MinimumLeafSizeSEXP, SEXP seedSEXP, SEXP MinLeafSEXP) {
+List BayesianCART(NumericMatrix x, IntegerVector y, NumericVector V, NumericVector a, NumericVector candidate_dose, int cat_num, bool standardization, int burnin, int Length, int every, int nChain, double size, double shape, double T0, String prior_leaf, int MinimumLeafSize, unsigned int seed, int MinLeaf);
+RcppExport SEXP _IndividualDosing_BayesianCART(SEXP xSEXP, SEXP ySEXP, SEXP VSEXP, SEXP aSEXP, SEXP candidate_doseSEXP, SEXP cat_numSEXP, SEXP standardizationSEXP, SEXP burninSEXP, SEXP LengthSEXP, SEXP everySEXP, SEXP nChainSEXP, SEXP sizeSEXP, SEXP shapeSEXP, SEXP T0SEXP, SEXP prior_leafSEXP, SEXP MinimumLeafSizeSEXP, SEXP seedSEXP, SEXP MinLeafSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -25,52 +25,50 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type nChain(nChainSEXP);
     Rcpp::traits::input_parameter< double >::type size(sizeSEXP);
     Rcpp::traits::input_parameter< double >::type shape(shapeSEXP);
+    Rcpp::traits::input_parameter< double >::type T0(T0SEXP);
     Rcpp::traits::input_parameter< String >::type prior_leaf(prior_leafSEXP);
     Rcpp::traits::input_parameter< int >::type MinimumLeafSize(MinimumLeafSizeSEXP);
     Rcpp::traits::input_parameter< unsigned int >::type seed(seedSEXP);
     Rcpp::traits::input_parameter< int >::type MinLeaf(MinLeafSEXP);
-    rcpp_result_gen = Rcpp::wrap(BayesianCART(x, y, V, a, candidate_dose, cat_num, standardization, burnin, Length, every, nChain, size, shape, prior_leaf, MinimumLeafSize, seed, MinLeaf));
+    rcpp_result_gen = Rcpp::wrap(BayesianCART(x, y, V, a, candidate_dose, cat_num, standardization, burnin, Length, every, nChain, size, shape, T0, prior_leaf, MinimumLeafSize, seed, MinLeaf));
     return rcpp_result_gen;
 END_RCPP
 }
-// vector_max
-void vector_max(std::vector<double> v, double& max, int& imax);
-RcppExport SEXP _STRLdose_vector_max(SEXP vSEXP, SEXP maxSEXP, SEXP imaxSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::vector<double> >::type v(vSEXP);
-    Rcpp::traits::input_parameter< double& >::type max(maxSEXP);
-    Rcpp::traits::input_parameter< int& >::type imax(imaxSEXP);
-    vector_max(v, max, imax);
-    return R_NilValue;
-END_RCPP
-}
-// dose_kernel_rf_cpp
-std::vector<double> dose_kernel_rf_cpp(const NumericVector& y, const NumericVector& a, const NumericMatrix& x, const NumericVector& a_out, double a_min, double a_max, const int n_pts);
-RcppExport SEXP _STRLdose_dose_kernel_rf_cpp(SEXP ySEXP, SEXP aSEXP, SEXP xSEXP, SEXP a_outSEXP, SEXP a_minSEXP, SEXP a_maxSEXP, SEXP n_ptsSEXP) {
+// GCBPS
+NumericVector GCBPS(const NumericMatrix& x, const NumericVector& y);
+RcppExport SEXP _IndividualDosing_GCBPS(SEXP xSEXP, SEXP ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericVector& >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type a(aSEXP);
     Rcpp::traits::input_parameter< const NumericMatrix& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(GCBPS(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
+// GAM
+NumericVector GAM(const NumericVector& a, const NumericVector& ps, const NumericVector& y, const NumericVector& a_out);
+RcppExport SEXP _IndividualDosing_GAM(SEXP aSEXP, SEXP psSEXP, SEXP ySEXP, SEXP a_outSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type a(aSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type ps(psSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type y(ySEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type a_out(a_outSEXP);
-    Rcpp::traits::input_parameter< double >::type a_min(a_minSEXP);
-    Rcpp::traits::input_parameter< double >::type a_max(a_maxSEXP);
-    Rcpp::traits::input_parameter< const int >::type n_pts(n_ptsSEXP);
-    rcpp_result_gen = Rcpp::wrap(dose_kernel_rf_cpp(y, a, x, a_out, a_min, a_max, n_pts));
+    rcpp_result_gen = Rcpp::wrap(GAM(a, ps, y, a_out));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_STRLdose_BayesianCART", (DL_FUNC) &_STRLdose_BayesianCART, 17},
-    {"_STRLdose_vector_max", (DL_FUNC) &_STRLdose_vector_max, 3},
-    {"_STRLdose_dose_kernel_rf_cpp", (DL_FUNC) &_STRLdose_dose_kernel_rf_cpp, 7},
+    {"_IndividualDosing_BayesianCART", (DL_FUNC) &_IndividualDosing_BayesianCART, 18},
+    {"_IndividualDosing_GCBPS", (DL_FUNC) &_IndividualDosing_GCBPS, 2},
+    {"_IndividualDosing_GAM", (DL_FUNC) &_IndividualDosing_GAM, 4},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_STRLdose(DllInfo *dll) {
+RcppExport void R_init_IndividualDosing(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

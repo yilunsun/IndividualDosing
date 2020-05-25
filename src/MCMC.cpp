@@ -33,9 +33,9 @@ MCMC::~MCMC(void)
 
 NodeTree *MCMC::Iterate(NodeTree *tree,std::vector<Proposal *> proposal,
 						int numberOfIteration,std::vector<int> &nAccept,
-						Random &ran) const
+						Random &ran, double T0, int Length, int i) const
 {
-
+  double Tt = pow(T0, 1-((double) i)/((double) Length));
 	nAccept.resize(proposal.size());
 	for (int j = 0; j < nAccept.size(); j++) nAccept[j] = 0;
 
@@ -50,21 +50,26 @@ NodeTree *MCMC::Iterate(NodeTree *tree,std::vector<Proposal *> proposal,
 			//Rcout<<"point 1: "<<tree->GetMiniNodeSize()<<"\n";
 			if (delta!=NULL)
 			{
-				pot += priorStructure->PotentialDifference(*tree,*delta,ran);
-			  pot += priorSplit->PotentialDifference(*tree,*delta,ran);
-				pot += like->PotentialDifference(*tree,*delta,ran);
+			// 	pot += priorStructure->PotentialDifference(*tree,*delta,ran);
+			//   pot += priorSplit->PotentialDifference(*tree,*delta,ran);
+			// 	pot += like->PotentialDifference(*tree,*delta,ran);
 				//Rcout<<"point 2: "<<tree->GetMiniNodeSize()<<"\n";
-        if (pot < 0) pot = 0;
+        // if (pot < 0) pot = 0;
         //if (pot > 4) pot = pot/50; 
         //Rcout<<"aplha: "<<exp(- pot)<<"\t";
-				if (ran.Unif01() <= exp(- pot))
+        NodeTree *tree_temp=tree->CopyTree();//Rcout<<"3. tree_temp: "<<tree_temp->GetMiniNodeSize()<<"\n";Rcout<<"3. tree: "<<tree->GetMiniNodeSize()<<"\n";
+			  tree = delta->PerformChange(tree);
+			  
+			  double oldval = tree_temp->GetVal()["value"];
+			  double newval = tree->GetVal()["value"];
+			  
+				if (ran.Unif01() <= exp((newval - oldval)/Tt)) // accept
 				{
 				  //Rcout<<"successful! \n";
 					nAccept[j]++;//Rcout<<"success #: "<<nAccept[j]<<"\n";
 					
 					//keep a copy of temporary
-					NodeTree *tree_temp=tree->CopyTree();//Rcout<<"3. tree_temp: "<<tree_temp->GetMiniNodeSize()<<"\n";Rcout<<"3. tree: "<<tree->GetMiniNodeSize()<<"\n";
-					tree = delta->PerformChange(tree);//想·Rcout<<"4. tree_temp: "<<tree_temp->GetMiniNodeSize()<<"\n";Rcout<<"4. tree: "<<tree->GetMiniNodeSize()<<"\n";
+					//Rcout<<"4. tree_temp: "<<tree_temp->GetMiniNodeSize()<<"\n";Rcout<<"4. tree: "<<tree->GetMiniNodeSize()<<"\n";
 					
 					// decide whether to revert the change
 					if (tree->GetMiniNodeSize() >= tree->GetMinLeaf()) {
