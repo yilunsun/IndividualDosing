@@ -47,7 +47,7 @@ class NodeTree : public Node
   List GetVal(); //get value of a tree and optimal label for each node
   std::vector <std::vector <double> > GetLeavesObservations();
   std::vector <std::vector <int> > GetLeavesSubjects();
-  std::vector<double> GAM(const NumericVector& a, const NumericVector& ps, const NumericVector& y, const NumericVector& a_out);
+  std::vector<double> GAM_pred(const NumericVector& a, const NumericVector& ps, const NumericVector& y, const NumericVector& a_out);
   NumericVector GCBPS(const NumericMatrix& x, const NumericVector& y);
   
   void vector_max(std::vector<double> v, double &max, int &imax);

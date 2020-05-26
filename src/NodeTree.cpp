@@ -12,21 +12,7 @@ using namespace arma;
 // [[Rcpp::plugins("cpp11")]]
 // [[Rcpp::depends(RcppArmadillo)]]
 
-/*** R
-npCBPS_neo <- function(y,x) {
-  library(CBPS)
-  #print("X:", dim(X))
-  return(1/(length(y)*unlist(npCBPS(y~x)['weights'])))
-}
 
-gam_neo <- function(a,ps,y,a_out) {
-  library(mgcv)
-  fit <- gam(y~s(a)+s(ps,by=a))
-  pred <- predict(fit, data.frame(ps=ps,a=rep(a_out,each=length(ps))))
-  optvalue <- apply(matrix(pred, nrow = length(ps)), 2, mean)
-  return(optvalue)
-}
-*/
 
 NodeTree::NodeTree()
 {
@@ -226,35 +212,36 @@ std::vector <Node *> NodeTree::GetLeaves()
 
 
 NumericVector NodeTree::GCBPS(const NumericMatrix& x, const NumericVector& y){ // this implementation requires expose predict in xgboost package as predict2
-  
+
   // Obtain environment containing function
-  // Rcpp::Environment package_env("package:bypassFormula"); 
-  // Rcpp::Function npCBPS_neo = package_env["npCBPS_neo"];  
-  // 
-  Rcpp::Environment G = Rcpp::Environment::global_env();
-  Rcpp::Function npCBPS_neo = G["npCBPS_neo"];
+  Rcpp::Environment package_env("package:bypassFormula");
+  Rcpp::Function npCBPS_neo = package_env["npCBPS_neo"];
+  //
+  // Rcout << "inside GCBPS, start getting global env" <<endl;
+  // Rcpp::Environment G = Rcpp::Environment::global_env();
+  // Rcpp::Function npCBPS = G["npCBPS_neo"];
   // Call the function and receive output (might not be list)
-  //Rcout << "here";
+  // Rcout << "inside GCBPS, before npCBPS_neo" <<endl;
   NumericVector rf_obj = npCBPS_neo(Named("y")=y, _["x"]=x);
   //Rcout << "2";
-  
+  // Rcout << "inside GCBPS, after npCBPS_neo" <<endl;
   return rf_obj;
 }
 
-std::vector<double> NodeTree::GAM(const NumericVector& a, const NumericVector& ps, const NumericVector& y, const NumericVector& a_out){ 
-  
+std::vector<double> NodeTree::GAM_pred(const NumericVector& a, const NumericVector& ps, const NumericVector& y, const NumericVector& a_out){
+
   // Obtain environment containing function
-  // Rcpp::Environment package_env("package:bypassFormula"); 
-  // Rcpp::Function gam_neo = package_env["gam_neo"];  
-  // 
-  Rcpp::Environment G = Rcpp::Environment::global_env();
-  Rcpp::Function gam_neo = G["gam_neo"];
-  
+  Rcpp::Environment package_env("package:bypassFormula");
+  Rcpp::Function gam_neo = package_env["gam_neo"];
+  //
+  // Rcpp::Environment G = Rcpp::Environment::global_env();
+  // Rcpp::Function gam_neo = G["gam_neo"];
+
   // Call the function and receive output (might not be list)
-  //Rcout << "here";
+  //Rcout << "inside GCBPS, before gam_neo" <<endl;
   NumericVector a_pred = gam_neo(Named("a")=a, _["ps"]=ps, _["y"]=y, _["a_out"]=a_out);
-  //Rcout << "2";
-  
+  //Rcout << "inside GCBPS, after gam_neo" <<endl;
+
   return as<std::vector<double> >(a_pred);
 }
 
@@ -298,10 +285,18 @@ List NodeTree::GetVal() //get value of a tree and optimal label for each node
       a_leaf(j) = obs->GetA(SubjectList[j]); // observed dose level vector
     };
     
-    //Rcout<<"x_leaf max: "<<max(x_leaf)<<"\n";
-    //Rcout<<"values: "<<value<<"\t";
+    if (SubjectList.size() < leaves[i]->GetMinLeaf()) {
+      List temp_list = List::create(Named("y_leaf")=y_leaf,
+                                    Named("a_leaf")=a_leaf,
+                                    Named("x_leaf")=x_leaf);
+      return List::create(Named("label")=temp_list,
+                          Named("value")=-9999,
+                          Named("fail")=true);
+    }
+    // Rcout<<"before GCBPS!"<<endl;
     NumericVector gps_leaf = GCBPS(x_leaf, a_leaf);
-    std::vector<double> est = GAM(a_leaf, gps_leaf, y_leaf, a_eval); //vector of estimated reward
+    // Rcout<<"GCBPS is done!"<<endl;
+    std::vector<double> est = GAM_pred(a_leaf, gps_leaf, y_leaf, a_eval); //vector of estimated reward
     double maxval;
     vector_max(est, maxval, opt);
     value = value + maxval;
@@ -310,7 +305,7 @@ List NodeTree::GetVal() //get value of a tree and optimal label for each node
                                     Named("a_leaf")=a_leaf,
                                     Named("x_leaf")=x_leaf);
       return List::create(Named("label")=temp_list,
-                          Named("value")=-999,
+                          Named("value")=-9999,
                           Named("fail")=true);
     }
     

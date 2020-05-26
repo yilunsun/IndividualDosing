@@ -45,7 +45,9 @@ List BayesianCART(NumericMatrix x, // baseline covariate
                   NumericVector candidate_dose, // the dose levels to choose from
                   int cat_num, bool standardization, int burnin, int Length, int every, int nChain,
                   double size, double shape, double T0, // annealing temperature
-                  String prior_leaf = "uniform", int MinimumLeafSize=1, unsigned int seed=123, int MinLeaf=30)
+                  std::vector<double> proprob, // proposal probability
+                  String prior_leaf = "uniform", int MinimumLeafSize=1, unsigned int seed=123, int MinLeaf=30
+                  )
 {
   Random ran(seed);
   NumericMatrix xo = x;//original data
@@ -126,21 +128,21 @@ List BayesianCART(NumericMatrix x, // baseline covariate
     //tree->checkTree();
     
     //Rcout<<"Initial Tree has a minimum node size: "<<tree->GetMiniNodeSize()<<"\n";
-    //Rcout<<"Initialization Completed."<<endl;
+    Rcout<<"Initialization Completed."<<endl;
 
     //
     // Initialise the proposal and MCMC classes
     //
-
+    ChangeLeavesIdentity noChange;
     std::vector<Proposal *> proposal1;
     proposal1.push_back(new ProposalChange(prob,density));
     proposal1.push_back(new ProposalPruneGrow(prob, density));
     proposal1.push_back(new ProposalSwap());
     proposal1.push_back(new ProposalPruneGrow(prob, density));
 
-    std::vector<Proposal *> proposal2;
-    ChangeLeavesIdentity noChange;
-    proposal2.push_back(new ProposalBasicRadical(noChange));
+    // std::vector<Proposal *> proposal2;
+    
+    proposal1.push_back(new ProposalBasicRadical(noChange));
 
     MCMC mcmc(mTreeStructure,mSplitVariable,mLikelihood);
     std::vector <int> Accept(4, 0);
@@ -151,26 +153,27 @@ List BayesianCART(NumericMatrix x, // baseline covariate
     for (int i = 0; i < Length; i++)
     {
 
-      // if (i%50==0)
-      //   Rcout<<"Iteration: "<<i<<endl;
-      //Rcout<<"Now the Tree has a minimum node size: "<<tree->GetMiniNodeSize()<<"\n";
+      if (i%50==0)
+        Rcout<<"Iteration: "<<i<<endl;
+      // Rcout<<"Now the Tree has a minimum node size: "<<tree->GetMiniNodeSize()<<"\n";
 
       std::vector<int> nAcc;
-
-      for (int kk = 1; kk <= every; kk++)
-      {
-        tree = mcmc.Iterate(tree,proposal1,250,nAcc,ran,T0,Length,i);
-        tree = mcmc.Iterate(tree,proposal2,50,nAcc,ran,T0,Length,i);
-        tree = mcmc.Iterate(tree,proposal1,250,nAcc,ran,T0,Length,i);
-        tree = mcmc.Iterate(tree,proposal2,50,nAcc,ran,T0,Length,i);
-      }
+      
+      tree = mcmc.Iterate(tree,proposal1,every,nAcc,ran,T0,proprob);
+      // for (int kk = 1; kk <= every; kk++)
+      // {
+      //   tree = mcmc.Iterate(tree,proposal1,25,nAcc,ran,T0,proprob);
+      //   tree = mcmc.Iterate(tree,proposal2,5,nAcc,ran,T0,Length,i);
+      //   tree = mcmc.Iterate(tree,proposal1,25,nAcc,ran,T0,Length,i);
+      //   tree = mcmc.Iterate(tree,proposal2,5,nAcc,ran,T0,Length,i);
+      // }
       if (i>=burnin)
       {
         NodeTree *temp=tree->CopyTree();
         Sample.push_back(temp);
       };
     };
-    Rcout<<"Evaluating each tree, please be patient."<<endl;
+    //Rcout<<"Evaluating each tree, please be patient."<<endl;
     Diagnose Diag(Sample, dDensity, mTreeStructure, mSplitVariable, mLikelihood);
     
     std::string I=std::to_string(l);
@@ -181,9 +184,9 @@ List BayesianCART(NumericMatrix x, // baseline covariate
     for (int k=0;k<proposal1.size();k++)
       delete proposal1[k];
     proposal1.clear();
-    for (int k=0;k<proposal2.size();k++)
-      delete proposal2[k];
-    proposal2.clear();
+    // for (int k=0;k<proposal2.size();k++)
+    //   delete proposal2[k];
+    // proposal2.clear();
     for (int k=0;k<Sample.size();k++)
       delete Sample[k];
     Sample.clear();

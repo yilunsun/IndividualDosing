@@ -7,8 +7,8 @@
 using namespace Rcpp;
 
 // BayesianCART
-List BayesianCART(NumericMatrix x, IntegerVector y, NumericVector V, NumericVector a, NumericVector candidate_dose, int cat_num, bool standardization, int burnin, int Length, int every, int nChain, double size, double shape, double T0, String prior_leaf, int MinimumLeafSize, unsigned int seed, int MinLeaf);
-RcppExport SEXP _IndividualDosing_BayesianCART(SEXP xSEXP, SEXP ySEXP, SEXP VSEXP, SEXP aSEXP, SEXP candidate_doseSEXP, SEXP cat_numSEXP, SEXP standardizationSEXP, SEXP burninSEXP, SEXP LengthSEXP, SEXP everySEXP, SEXP nChainSEXP, SEXP sizeSEXP, SEXP shapeSEXP, SEXP T0SEXP, SEXP prior_leafSEXP, SEXP MinimumLeafSizeSEXP, SEXP seedSEXP, SEXP MinLeafSEXP) {
+List BayesianCART(NumericMatrix x, IntegerVector y, NumericVector V, NumericVector a, NumericVector candidate_dose, int cat_num, bool standardization, int burnin, int Length, int every, int nChain, double size, double shape, double T0, std::vector<double> proprob, String prior_leaf, int MinimumLeafSize, unsigned int seed, int MinLeaf);
+RcppExport SEXP _IndividualDosing_BayesianCART(SEXP xSEXP, SEXP ySEXP, SEXP VSEXP, SEXP aSEXP, SEXP candidate_doseSEXP, SEXP cat_numSEXP, SEXP standardizationSEXP, SEXP burninSEXP, SEXP LengthSEXP, SEXP everySEXP, SEXP nChainSEXP, SEXP sizeSEXP, SEXP shapeSEXP, SEXP T0SEXP, SEXP proprobSEXP, SEXP prior_leafSEXP, SEXP MinimumLeafSizeSEXP, SEXP seedSEXP, SEXP MinLeafSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -26,45 +26,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type size(sizeSEXP);
     Rcpp::traits::input_parameter< double >::type shape(shapeSEXP);
     Rcpp::traits::input_parameter< double >::type T0(T0SEXP);
+    Rcpp::traits::input_parameter< std::vector<double> >::type proprob(proprobSEXP);
     Rcpp::traits::input_parameter< String >::type prior_leaf(prior_leafSEXP);
     Rcpp::traits::input_parameter< int >::type MinimumLeafSize(MinimumLeafSizeSEXP);
     Rcpp::traits::input_parameter< unsigned int >::type seed(seedSEXP);
     Rcpp::traits::input_parameter< int >::type MinLeaf(MinLeafSEXP);
-    rcpp_result_gen = Rcpp::wrap(BayesianCART(x, y, V, a, candidate_dose, cat_num, standardization, burnin, Length, every, nChain, size, shape, T0, prior_leaf, MinimumLeafSize, seed, MinLeaf));
-    return rcpp_result_gen;
-END_RCPP
-}
-// GCBPS
-NumericVector GCBPS(const NumericMatrix& x, const NumericVector& y);
-RcppExport SEXP _IndividualDosing_GCBPS(SEXP xSEXP, SEXP ySEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type y(ySEXP);
-    rcpp_result_gen = Rcpp::wrap(GCBPS(x, y));
-    return rcpp_result_gen;
-END_RCPP
-}
-// GAM
-NumericVector GAM(const NumericVector& a, const NumericVector& ps, const NumericVector& y, const NumericVector& a_out);
-RcppExport SEXP _IndividualDosing_GAM(SEXP aSEXP, SEXP psSEXP, SEXP ySEXP, SEXP a_outSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericVector& >::type a(aSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type ps(psSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type a_out(a_outSEXP);
-    rcpp_result_gen = Rcpp::wrap(GAM(a, ps, y, a_out));
+    rcpp_result_gen = Rcpp::wrap(BayesianCART(x, y, V, a, candidate_dose, cat_num, standardization, burnin, Length, every, nChain, size, shape, T0, proprob, prior_leaf, MinimumLeafSize, seed, MinLeaf));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_IndividualDosing_BayesianCART", (DL_FUNC) &_IndividualDosing_BayesianCART, 18},
-    {"_IndividualDosing_GCBPS", (DL_FUNC) &_IndividualDosing_GCBPS, 2},
-    {"_IndividualDosing_GAM", (DL_FUNC) &_IndividualDosing_GAM, 4},
+    {"_IndividualDosing_BayesianCART", (DL_FUNC) &_IndividualDosing_BayesianCART, 19},
     {NULL, NULL, 0}
 };
 

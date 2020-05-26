@@ -102,7 +102,7 @@ List Diagnose::Scoring(Random &ran)
   };
   
   int which_max=std::distance(ppot.begin(),std::min_element(ppot.begin(),ppot.end()));
-  int val_max=std::distance(values.begin(),std::min_element(values.begin(),values.end()));
+  int val_max=std::distance(values.begin(),std::max_element(values.begin(),values.end()));
   
   //List MAPtree = Sample[which_max]->DumpDotFile();
   List OptTree = Sample[val_max]->DumpDotFile();

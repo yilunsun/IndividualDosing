@@ -19,7 +19,7 @@
 //   return(optvalue)
 // }
 // */
-// // [[Rcpp::export]]
+// 
 // NumericVector GCBPS(const NumericMatrix& x, const NumericVector& y){ // this implementation requires expose predict in xgboost package as predict2
 //   
 //   // Obtain environment containing function
@@ -27,16 +27,16 @@
 //   // Rcpp::Function npCBPS_neo = package_env["npCBPS_neo"];  
 //   // 
 //   Rcpp::Environment G = Rcpp::Environment::global_env();
-//   Rcpp::Function npCBPS_neo = G["npCBPS_neo"];
+//   Rcpp::Function npCBPS = G["npCBPS_neo"];
 //   // Call the function and receive output (might not be list)
 //   //Rcout << "here";
-//   NumericVector rf_obj = npCBPS_neo(Named("y")=y, _["x"]=x);
+//   NumericVector rf_obj = npCBPS(Named("y")=y, _["x"]=x);
 //   //Rcout << "2";
 //   
 //   return rf_obj;
 // }
 // 
-// // [[Rcpp::export]]
+// 
 // std::vector<double> GAM_pred(const NumericVector& a, const NumericVector& ps, const NumericVector& y, const NumericVector& a_out){ 
 //   
 //   // Obtain environment containing function
