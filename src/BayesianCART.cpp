@@ -45,8 +45,9 @@ List BayesianCART(NumericMatrix x, // baseline covariate
                   NumericVector candidate_dose, // the dose levels to choose from
                   int cat_num, bool standardization, int burnin, int Length, int every, int nChain,
                   double size, double shape, double T0, // annealing temperature
+                  double complexity,
                   std::vector<double> proprob, // proposal probability
-                  String prior_leaf = "uniform", int MinimumLeafSize=1, unsigned int seed=123, int MinLeaf=30
+                  String prior_leaf = "uniform", int MinimumLeafSize=1, unsigned int seed=123, int MinLeaf=30, bool verbose=true
                   )
 {
   Random ran(seed);
@@ -127,8 +128,11 @@ List BayesianCART(NumericMatrix x, // baseline covariate
     }
     //tree->checkTree();
     
-    //Rcout<<"Initial Tree has a minimum node size: "<<tree->GetMiniNodeSize()<<"\n";
-    Rcout<<"Initialization Completed."<<endl;
+    if (verbose) {
+      Rcout<<"Initial Tree has a minimum node size: "<<tree->GetMiniNodeSize()<<"\n";
+      Rcout<<"Initialization Completed."<<endl;
+    }
+    
 
     //
     // Initialise the proposal and MCMC classes
@@ -153,13 +157,13 @@ List BayesianCART(NumericMatrix x, // baseline covariate
     for (int i = 0; i < Length; i++)
     {
 
-      if (i%50==0)
+      if (verbose)
         Rcout<<"Iteration: "<<i<<endl;
       // Rcout<<"Now the Tree has a minimum node size: "<<tree->GetMiniNodeSize()<<"\n";
 
       std::vector<int> nAcc;
       
-      tree = mcmc.Iterate(tree,proposal1,every,nAcc,ran,T0,proprob);
+      tree = mcmc.Iterate(tree,proposal1,every,nAcc,ran,T0,proprob,complexity,verbose);
       // for (int kk = 1; kk <= every; kk++)
       // {
       //   tree = mcmc.Iterate(tree,proposal1,25,nAcc,ran,T0,proprob);
@@ -174,6 +178,11 @@ List BayesianCART(NumericMatrix x, // baseline covariate
       };
     };
     //Rcout<<"Evaluating each tree, please be patient."<<endl;
+    
+    if (verbose) {
+      Rcout<<"Evaluating each tree, please be patient. "<<endl;
+    }
+    
     Diagnose Diag(Sample, dDensity, mTreeStructure, mSplitVariable, mLikelihood);
     
     std::string I=std::to_string(l);

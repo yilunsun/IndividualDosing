@@ -14,7 +14,7 @@ class MCMC
 
   NodeTree *Iterate(NodeTree *tree,std::vector<Proposal *> proposal,
 		    int numberOfIteration,std::vector<int> &nAccept,
-		    Random &ran, double T0, const std::vector<double> &proprob) const;
+		    Random &ran, double T0, const std::vector<double> &proprob, double complexity, bool verbose) const;
 
  private:
   Model *priorStructure;

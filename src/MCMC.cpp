@@ -33,13 +33,16 @@ MCMC::~MCMC(void)
 
 NodeTree *MCMC::Iterate(NodeTree *tree,std::vector<Proposal *> proposal,
 						int numberOfIteration,std::vector<int> &nAccept,
-						Random &ran, double T0, const std::vector<double> &proprob) const
+						Random &ran, double T0, const std::vector<double> &proprob, double complexity, bool verbose) const
 {
 	nAccept.resize(proposal.size());
 	for (int j = 0; j < nAccept.size(); j++) nAccept[j] = 0;
 
 	for (int i = 0; i < numberOfIteration; i++)
 	{
+	  if (verbose)
+	    Rcout<<"Inner Loop: "<<i<<endl;
+	  
 	  double Tt = pow(T0, 1-((double) i)/((double) numberOfIteration));
 	  // Rcout<<"Tt: "<<Tt<<endl;
 	  
@@ -63,8 +66,12 @@ NodeTree *MCMC::Iterate(NodeTree *tree,std::vector<Proposal *> proposal,
 	    // Rcout<<"calculating values!"<<endl;
 	    List oldlist = tree_temp->GetVal();
 	    List newlist = tree->GetVal();
-	    double oldval = oldlist["value"];
-	    double newval = newlist["value"];
+	    // int old_size = tree_temp->GetSize();
+	    // int new_size = tree->GetSize();
+	    double oldval = as<NumericVector>(oldlist["value"])[0] - tree_temp->GetSize() * complexity;
+	    double newval = as<NumericVector>(newlist["value"])[0] - tree->GetSize() * complexity;
+	    // double oldval = oldlist["value"] - old_size * complexity;
+	    // double newval = newlist["value"] - new_size * complexity;
 	    // Rcout<<"old value:"<<oldval<<endl;
 	    // Rcout<<"new value:"<<newval<<endl;
 	    

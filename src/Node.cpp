@@ -154,7 +154,7 @@ void Node::SetSubjectList(std::vector <int> SubjectList)
 int Node::GetNumberOfLeaf(void) const
 {
   //
-  // This is a quite inefficent implementation og this function.
+  // This is a quite inefficient implementation of this function.
   // Perhaps it is better to store some extra information
   // to make this more efficient.
   //

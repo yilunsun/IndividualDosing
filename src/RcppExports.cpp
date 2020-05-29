@@ -7,8 +7,8 @@
 using namespace Rcpp;
 
 // BayesianCART
-List BayesianCART(NumericMatrix x, IntegerVector y, NumericVector V, NumericVector a, NumericVector candidate_dose, int cat_num, bool standardization, int burnin, int Length, int every, int nChain, double size, double shape, double T0, std::vector<double> proprob, String prior_leaf, int MinimumLeafSize, unsigned int seed, int MinLeaf);
-RcppExport SEXP _IndividualDosing_BayesianCART(SEXP xSEXP, SEXP ySEXP, SEXP VSEXP, SEXP aSEXP, SEXP candidate_doseSEXP, SEXP cat_numSEXP, SEXP standardizationSEXP, SEXP burninSEXP, SEXP LengthSEXP, SEXP everySEXP, SEXP nChainSEXP, SEXP sizeSEXP, SEXP shapeSEXP, SEXP T0SEXP, SEXP proprobSEXP, SEXP prior_leafSEXP, SEXP MinimumLeafSizeSEXP, SEXP seedSEXP, SEXP MinLeafSEXP) {
+List BayesianCART(NumericMatrix x, IntegerVector y, NumericVector V, NumericVector a, NumericVector candidate_dose, int cat_num, bool standardization, int burnin, int Length, int every, int nChain, double size, double shape, double T0, double complexity, std::vector<double> proprob, String prior_leaf, int MinimumLeafSize, unsigned int seed, int MinLeaf, bool verbose);
+RcppExport SEXP _IndividualDosing_BayesianCART(SEXP xSEXP, SEXP ySEXP, SEXP VSEXP, SEXP aSEXP, SEXP candidate_doseSEXP, SEXP cat_numSEXP, SEXP standardizationSEXP, SEXP burninSEXP, SEXP LengthSEXP, SEXP everySEXP, SEXP nChainSEXP, SEXP sizeSEXP, SEXP shapeSEXP, SEXP T0SEXP, SEXP complexitySEXP, SEXP proprobSEXP, SEXP prior_leafSEXP, SEXP MinimumLeafSizeSEXP, SEXP seedSEXP, SEXP MinLeafSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -26,18 +26,20 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type size(sizeSEXP);
     Rcpp::traits::input_parameter< double >::type shape(shapeSEXP);
     Rcpp::traits::input_parameter< double >::type T0(T0SEXP);
+    Rcpp::traits::input_parameter< double >::type complexity(complexitySEXP);
     Rcpp::traits::input_parameter< std::vector<double> >::type proprob(proprobSEXP);
     Rcpp::traits::input_parameter< String >::type prior_leaf(prior_leafSEXP);
     Rcpp::traits::input_parameter< int >::type MinimumLeafSize(MinimumLeafSizeSEXP);
     Rcpp::traits::input_parameter< unsigned int >::type seed(seedSEXP);
     Rcpp::traits::input_parameter< int >::type MinLeaf(MinLeafSEXP);
-    rcpp_result_gen = Rcpp::wrap(BayesianCART(x, y, V, a, candidate_dose, cat_num, standardization, burnin, Length, every, nChain, size, shape, T0, proprob, prior_leaf, MinimumLeafSize, seed, MinLeaf));
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(BayesianCART(x, y, V, a, candidate_dose, cat_num, standardization, burnin, Length, every, nChain, size, shape, T0, complexity, proprob, prior_leaf, MinimumLeafSize, seed, MinLeaf, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_IndividualDosing_BayesianCART", (DL_FUNC) &_IndividualDosing_BayesianCART, 19},
+    {"_IndividualDosing_BayesianCART", (DL_FUNC) &_IndividualDosing_BayesianCART, 21},
     {NULL, NULL, 0}
 };
 
