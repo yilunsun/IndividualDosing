@@ -47,7 +47,7 @@ List BayesianCART(NumericMatrix x, // baseline covariate
                   double size, double shape, double T0, // annealing temperature
                   double complexity,
                   std::vector<double> proprob, // proposal probability
-                  String prior_leaf = "uniform", int MinimumLeafSize=1, unsigned int seed=123, int MinLeaf=30, bool verbose=true
+                  String prior_leaf = "uniform", int MinimumLeafSize=1, unsigned int seed=123, int MinLeaf=30, bool verbose=true, bool np=false
                   )
 {
   Random ran(seed);
@@ -163,7 +163,7 @@ List BayesianCART(NumericMatrix x, // baseline covariate
 
       std::vector<int> nAcc;
       
-      tree = mcmc.Iterate(tree,proposal1,every,nAcc,ran,T0,proprob,complexity,verbose);
+      tree = mcmc.Iterate(tree,proposal1,every,nAcc,ran,T0,proprob,complexity,verbose,np);
       // for (int kk = 1; kk <= every; kk++)
       // {
       //   tree = mcmc.Iterate(tree,proposal1,25,nAcc,ran,T0,proprob);

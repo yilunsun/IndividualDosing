@@ -22,6 +22,7 @@ NodeTree::NodeTree()
 	this->splitVariable=-1;
 	left=NULL;
 	right=NULL;
+	this->value=-9999;
 	return;
 };
 
@@ -40,6 +41,7 @@ NodeTree::NodeTree(const Observation *obs)
 	  Splitting_var.push_back(i);
 	this->nLeaf=0;
 	this->nLevel=0;
+	this->value=-9999;
 	return;
 };
 
@@ -65,6 +67,7 @@ NodeTree::NodeTree(Node &root)
 	parent=NULL;
 	this->nLeaf=0;
 	this->nLevel=0;
+	this->value=-9999;
 	Node* NewNode=root.CopySubTree();
 	this->SetLeftNode(NewNode->GetLeftNode());
 	this->SetRightNode(NewNode->GetRightNode());
@@ -94,6 +97,8 @@ NodeTree* NodeTree::CopyTree(void) const
 	NewTree->SetSubjectList(this->GetSubjectList());
 	NewTree->SetMinimumLeafSize(this->GetMinimumLeafSize());
 	NewTree->SetMinLeaf(this->GetMinLeaf());
+	NewTree->SetValue(this->GetValue());
+	NewTree->SetLabel(this->GetLabel());
 	if (this->GetLeftNode()!=NULL || this->GetRightNode()!=NULL)
 	{
 		Node* pLeft=this->GetLeftNode()->CopySubTree();
@@ -103,6 +108,18 @@ NodeTree* NodeTree::CopyTree(void) const
 	}
 
 	return NewTree;
+};
+
+void NodeTree::SetValue(double v)
+{
+  value=v;
+  return;
+};
+
+void NodeTree::SetLabel(std::vector <int> lbl)
+{
+  label=lbl;
+  return;
 };
 
 double NodeTree::Pot(const Model &modelStructure, const Model &modelVar,  const Model &modelLikelihood, Random &ran)
@@ -211,20 +228,20 @@ std::vector <Node *> NodeTree::GetLeaves()
 };
 
 
-NumericVector NodeTree::GCBPS(const NumericMatrix& x, const NumericVector& y){ // this implementation requires expose predict in xgboost package as predict2
-
-  // Obtain environment containing function
+NumericVector NodeTree::GCBPS(const NumericMatrix& x, const NumericVector& y, bool np){ // this implementation requires expose predict in xgboost package as predict2
+  
   Rcpp::Environment package_env("package:bypassFormula");
-  Rcpp::Function npCBPS_neo = package_env["npCBPS_neo"];
-  //
-  // Rcout << "inside GCBPS, start getting global env" <<endl;
-  // Rcpp::Environment G = Rcpp::Environment::global_env();
-  // Rcpp::Function npCBPS = G["npCBPS_neo"];
-  // Call the function and receive output (might not be list)
-  // Rcout << "inside GCBPS, before npCBPS_neo" <<endl;
-  NumericVector rf_obj = npCBPS_neo(Named("y")=y, _["x"]=x);
-  //Rcout << "2";
-  // Rcout << "inside GCBPS, after npCBPS_neo" <<endl;
+  NumericVector rf_obj(y.length());
+  if (np)
+  {
+    // Obtain environment containing function
+    Rcpp::Function npCBPS_neo = package_env["npCBPS_neo"];
+    rf_obj = npCBPS_neo(Named("y")=y, _["x"]=x);
+  } else {
+    Rcpp::Function GPS_neo = package_env["GPS_neo"];
+    rf_obj = GPS_neo(Named("y")=y, _["x"]=x);
+  }
+  
   return rf_obj;
 }
 
@@ -245,7 +262,7 @@ std::vector<double> NodeTree::GAM_pred(const NumericVector& a, const NumericVect
   return as<std::vector<double> >(a_pred);
 }
 
-List NodeTree::GetVal() //get value of a tree and optimal label for each node
+List NodeTree::GetVal(bool np) //get value of a tree and optimal label for each node
 {
   double value = 0; //value is the value of the tree
   std::vector <int> label; //label is optimal dose vector for each leaf
@@ -294,7 +311,7 @@ List NodeTree::GetVal() //get value of a tree and optimal label for each node
                           Named("fail")=true);
     }
     // Rcout<<"before GCBPS!"<<endl;
-    NumericVector gps_leaf = GCBPS(x_leaf, a_leaf);
+    NumericVector gps_leaf = GCBPS(x_leaf, a_leaf, np);
     // Rcout<<"GCBPS is done!"<<endl;
     std::vector<double> est = GAM_pred(a_leaf, gps_leaf, y_leaf, a_eval); //vector of estimated reward
     double maxval;
@@ -315,7 +332,8 @@ List NodeTree::GetVal() //get value of a tree and optimal label for each node
   delete Tree;
   leaves.clear();
   node.clear();
-  
+  this->SetValue(value);
+  this->SetLabel(label);
   return List::create(Named("label")=label,
                       Named("value")=value,
                       Named("fail")=false);

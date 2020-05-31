@@ -94,11 +94,7 @@ List Diagnose::Scoring(Random &ran)
     
     treesize.push_back(Sample[i]->GetSize());
     MinimumLeafNode.push_back(Sample[i]->GetMiniNodeSize());
-    List templist = Sample[i]->GetVal();
-    if (templist[2]) {
-      return templist[0];
-    }
-    values.push_back(templist[1]);
+    values.push_back(Sample[i]->GetValue());
   };
   
   int which_max=std::distance(ppot.begin(),std::min_element(ppot.begin(),ppot.end()));
@@ -106,7 +102,7 @@ List Diagnose::Scoring(Random &ran)
   
   //List MAPtree = Sample[which_max]->DumpDotFile();
   List OptTree = Sample[val_max]->DumpDotFile();
-  std::vector <int> label_opt = Sample[val_max]->GetVal()[0];
+  std::vector <int> label_opt = Sample[val_max]->GetLabel();
 
   return List::create(//Named("loglikelihood")=llkhd,
                       //Named("posteriorpotential")=ppot,

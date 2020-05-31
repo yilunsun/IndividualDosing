@@ -38,24 +38,29 @@ class NodeTree : public Node
   double LogLikelihood(const Model &modelLikelihood, Random &ran);
   NodeTree *CopyTree(void) const;
   double GetPot() {return potential;};
+  double GetValue() const {return value;}; // return calculated value
+  std::vector <int> GetLabel() const {return label;}; // return calculated value
+  void SetValue(double v);
+  void SetLabel(std::vector <int> lbl);
   bool Misclassfication(int &LeavesSize, int &Error, Density *like) const;
   std::vector <int> GetSplittingVariableSet() const;
 
   int GetSize() const;
   int GetMiniNodeSize() const;
   std::vector <Node *> GetLeaves();
-  List GetVal(); //get value of a tree and optimal label for each node
+  List GetVal(bool np); //get value of a tree and optimal label for each node
   std::vector <std::vector <double> > GetLeavesObservations();
   std::vector <std::vector <int> > GetLeavesSubjects();
   std::vector<double> GAM_pred(const NumericVector& a, const NumericVector& ps, const NumericVector& y, const NumericVector& a_out);
-  NumericVector GCBPS(const NumericMatrix& x, const NumericVector& y);
+  NumericVector GCBPS(const NumericMatrix& x, const NumericVector& y, bool np);
   
   void vector_max(std::vector<double> v, double &max, int &imax);
   void checkTree(void) const;
   
  private:
   double potential;
-    
+  double value;
+  std::vector <int> label; 
   int nLeaf;
   int nLevel;
 };
