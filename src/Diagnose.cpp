@@ -72,20 +72,20 @@ Diagnose::~Diagnose()
 
 List Diagnose::Scoring(Random &ran)
 {
-  std::vector <int> Observees;
+  // std::vector <int> Observees;
   
   // Sort tree first
-  this->Sort(ran);
+  // this->Sort(ran);
   
   // Select observees.
   // Modified on Dec 11th. To add only a few observees. Changed from Sample[0]->GetObservation()->GetN() to 4
 
-  for (int i=0;i<Sample[0]->GetObservation()->GetN();i++)
-    Observees.push_back(i);
+  // for (int i=0;i<Sample[0]->GetObservation()->GetN();i++)
+  //   Observees.push_back(i);
   
-  std::vector <std::vector <double> > llkhd = LogLikelihood(ran);
+  // std::vector <std::vector <double> > llkhd = LogLikelihood(ran);
   
-  std::vector <double> ppot=PosteriorPotential(ran);
+  // std::vector <double> ppot=PosteriorPotential(ran);
   std::vector <int> treesize;
   std::vector <int> MinimumLeafNode;
   std::vector <double> values;
@@ -97,7 +97,7 @@ List Diagnose::Scoring(Random &ran)
     values.push_back(Sample[i]->GetValue());
   };
   
-  int which_max=std::distance(ppot.begin(),std::min_element(ppot.begin(),ppot.end()));
+  // int which_max=std::distance(ppot.begin(),std::min_element(ppot.begin(),ppot.end()));
   int val_max=std::distance(values.begin(),std::max_element(values.begin(),values.end()));
   
   //List MAPtree = Sample[which_max]->DumpDotFile();

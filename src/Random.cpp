@@ -38,10 +38,12 @@ Random::~Random(void)
 
 double Random::Unif01(void)
 {
-  seedValue = MULTIPLIER * seedValue + SHIFT;
-  double r = ((double) seedValue) * INVMOD;
+  // seedValue = MULTIPLIER * seedValue + SHIFT;
+  // double r = ((double) seedValue) * INVMOD;
+  
+  Rcpp::NumericVector r = runif(1);
 
-  return r;
+  return r(0);
 };
 
 double Random::PotentialUnif(double x, double lower, double upper)

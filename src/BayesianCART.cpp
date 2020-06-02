@@ -113,18 +113,26 @@ List BayesianCART(NumericMatrix x, // baseline covariate
   ModelLikelihoodMultinomial mLikelihood(alpha,cat);
   DensityDirichlet dDensity(alpha,cat);
   //Rcout<<"2!"<<endl;
+  NodeTree *tree;
   for (int l = 0; l < nChain; l++) 
   {
-    //Rcout<<"Chain #"<<l+1<<endl;
+    if (verbose) Rcout<<"Starting Chain #"<<l+1<<endl; 
     
-    NodeTree *tree = mTreeStructure.Simulate(ran, &obs, 1);
+    tree = mTreeStructure.Simulate(ran, &obs, 1);
     tree->SetMinimumLeafSize(MinimumLeafSize);
     tree->SetAllMinLeaf(MinLeaf);
     mSplitVariable.Simulate(*tree,ran); 
     tree->SetObservation(&obs);
     
+    if (verbose) 
+    {
+      Rcout<<"Now checking initial tree."<<endl; 
+    }
+    
     while (!(tree->UpdateSubjectList() && tree->GetMiniNodeSize() >= MinLeaf)){
       mSplitVariable.Simulate(*tree,ran);
+      if (tree->UpdateSubjectList()) Rcout<<"UpdateSubjectList successful."<<endl; 
+      Rcout<<"minimum leaf node size is:" <<tree->GetMiniNodeSize()<<endl;
     }
     //tree->checkTree();
     
@@ -149,7 +157,7 @@ List BayesianCART(NumericMatrix x, // baseline covariate
     proposal1.push_back(new ProposalBasicRadical(noChange));
 
     MCMC mcmc(mTreeStructure,mSplitVariable,mLikelihood);
-    std::vector <int> Accept(4, 0);
+    std::vector <int> Accept(5, 0);
     //
     // Run the Metropolis-Hastings algorithm
     //
@@ -158,7 +166,7 @@ List BayesianCART(NumericMatrix x, // baseline covariate
     {
 
       if (verbose)
-        Rcout<<"Iteration: "<<i<<endl;
+        Rcout<<"In Chain: "<<l+1<<"; Iteration: "<<i<<endl;
       // Rcout<<"Now the Tree has a minimum node size: "<<tree->GetMiniNodeSize()<<"\n";
 
       std::vector<int> nAcc;
@@ -176,11 +184,11 @@ List BayesianCART(NumericMatrix x, // baseline covariate
         NodeTree *temp=tree->CopyTree();
         Sample.push_back(temp);
       };
+      std::transform(Accept.begin(), Accept.end(), nAcc.begin(), Accept.begin(), std::plus<int>());
     };
-    //Rcout<<"Evaluating each tree, please be patient."<<endl;
-    
+    double rate = (double) std::accumulate(Accept.begin(), Accept.end(), 0) * 100 / (double) (Length * every);
     if (verbose) {
-      Rcout<<"Evaluating each tree, please be patient. "<<endl;
+      Rcout<<"Acceptance rate (%): "<< rate <<endl;
     }
     
     Diagnose Diag(Sample, dDensity, mTreeStructure, mSplitVariable, mLikelihood);
@@ -190,15 +198,18 @@ List BayesianCART(NumericMatrix x, // baseline covariate
     Result[chainname]=Diag.Scoring(ran);
     
     delete tree;
+    // tree = NULL;
     for (int k=0;k<proposal1.size();k++)
       delete proposal1[k];
     proposal1.clear();
-    // for (int k=0;k<proposal2.size();k++)
-    //   delete proposal2[k];
-    // proposal2.clear();
+    
     for (int k=0;k<Sample.size();k++)
       delete Sample[k];
     Sample.clear();
+    
+    if (verbose) {
+      Rcout<<"Clearing Chain Content. "<<endl;
+    }
   };
 
   return Result;

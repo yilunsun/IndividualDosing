@@ -66,6 +66,7 @@ NodeTree *MCMC::Iterate(NodeTree *tree,std::vector<Proposal *> proposal,
         
         if (ran.Unif01() <= exp((newval - oldval)/Tt)) // accept
         {
+          nAccept[j]++;
           delete tree_temp;
         } else {
           delete tree;
