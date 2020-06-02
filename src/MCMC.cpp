@@ -37,8 +37,7 @@ NodeTree *MCMC::Iterate(NodeTree *tree,std::vector<Proposal *> proposal,
 {
   nAccept.resize(proposal.size());
   for (int j = 0; j < nAccept.size(); j++) nAccept[j] = 0;
-  double value_best = -9999;
-  NodeTree *tree_best;
+  
   for (int i = 0; i < numberOfIteration; i++)
   {
     if (verbose)
@@ -67,12 +66,6 @@ NodeTree *MCMC::Iterate(NodeTree *tree,std::vector<Proposal *> proposal,
         
         if (ran.Unif01() <= exp((newval - oldval)/Tt)) // accept
         {
-          if (newval > value_best)
-          {
-            value_best = newval;
-            tree_best = tree->CopyTree();
-          }
-          nAccept[j]++;
           delete tree_temp;
         } else {
           delete tree;
@@ -87,16 +80,6 @@ NodeTree *MCMC::Iterate(NodeTree *tree,std::vector<Proposal *> proposal,
       delta=NULL;
     };
   };
-  
-  if (value_best > tree->GetValue()) {
-    delete tree;
-    tree = tree_best->CopyTree();
-    delete tree_best;
-    tree_best = NULL;
-  } else {
-    delete tree_best;
-    tree_best = NULL;
-  }
   
   return tree;
 };

@@ -115,7 +115,7 @@ List BayesianCART(NumericMatrix x, // baseline covariate
   //Rcout<<"2!"<<endl;
   for (int l = 0; l < nChain; l++) 
   {
-    if (verbose) Rcout<<"Chain #"<<l+1<<endl; 
+    //Rcout<<"Chain #"<<l+1<<endl;
     
     NodeTree *tree = mTreeStructure.Simulate(ran, &obs, 1);
     tree->SetMinimumLeafSize(MinimumLeafSize);
@@ -149,7 +149,7 @@ List BayesianCART(NumericMatrix x, // baseline covariate
     proposal1.push_back(new ProposalBasicRadical(noChange));
 
     MCMC mcmc(mTreeStructure,mSplitVariable,mLikelihood);
-    std::vector <int> Accept(5, 0);
+    std::vector <int> Accept(4, 0);
     //
     // Run the Metropolis-Hastings algorithm
     //
@@ -176,12 +176,11 @@ List BayesianCART(NumericMatrix x, // baseline covariate
         NodeTree *temp=tree->CopyTree();
         Sample.push_back(temp);
       };
-      std::transform(Accept.begin(), Accept.end(), nAcc.begin(), Accept.begin(), std::plus<int>());
     };
     //Rcout<<"Evaluating each tree, please be patient."<<endl;
-    double rate = (double) std::accumulate(Accept.begin(), Accept.end(), 0) * 100 / (double) (Length * every);
+    
     if (verbose) {
-      Rcout<<"Acceptance rate (%): "<< rate <<endl;
+      Rcout<<"Evaluating each tree, please be patient. "<<endl;
     }
     
     Diagnose Diag(Sample, dDensity, mTreeStructure, mSplitVariable, mLikelihood);
