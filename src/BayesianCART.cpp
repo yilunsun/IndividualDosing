@@ -115,7 +115,7 @@ List BayesianCART(NumericMatrix x, // baseline covariate
   //Rcout<<"2!"<<endl;
   for (int l = 0; l < nChain; l++) 
   {
-    //Rcout<<"Chain #"<<l+1<<endl;
+    if (verbose) Rcout<<"Chain #"<<l+1<<endl;
     
     NodeTree *tree = mTreeStructure.Simulate(ran, &obs, 1);
     tree->SetMinimumLeafSize(MinimumLeafSize);
@@ -133,7 +133,6 @@ List BayesianCART(NumericMatrix x, // baseline covariate
       Rcout<<"Initialization Completed."<<endl;
     }
     
-
     //
     // Initialise the proposal and MCMC classes
     //

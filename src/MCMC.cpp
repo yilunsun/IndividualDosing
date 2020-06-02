@@ -50,7 +50,7 @@ NodeTree *MCMC::Iterate(NodeTree *tree,std::vector<Proposal *> proposal,
     // Rcout<<"Tt: "<<Tt<<endl;
     
     int j = ran.Discrete(proprob);
-    
+    // Rcout<<"Proposal: "<<j<<endl;
     double pot = 0.0;
     Delta *delta = proposal[j]->ProposeChange(*tree,pot,ran);
     //Rcout<<"point 1: "<<tree->GetMiniNodeSize()<<"\n";
@@ -79,7 +79,7 @@ NodeTree *MCMC::Iterate(NodeTree *tree,std::vector<Proposal *> proposal,
         } else {
           delete tree;
           tree = tree_temp->CopyTree(); //revert move if accept is not OK
-          i--;
+          //i--;
         }
       } else {
         delete tree;
