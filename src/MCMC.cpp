@@ -35,14 +35,8 @@ NodeTree *MCMC::Iterate(NodeTree *tree,std::vector<Proposal *> proposal,
                         int numberOfIteration,std::vector<int> &nAccept,
                         Random &ran, double T0, const std::vector<double> &proprob, double complexity, bool verbose, bool np) const
 {
-  // int max_iter = 100;
-  // int counter = 0;
-  
   nAccept.resize(proposal.size());
   for (int j = 0; j < nAccept.size(); j++) nAccept[j] = 0;
-  
-  double value_best = -9999;
-  NodeTree *tree_best;
   
   for (int i = 0; i < numberOfIteration; i++)
   {
@@ -72,25 +66,14 @@ NodeTree *MCMC::Iterate(NodeTree *tree,std::vector<Proposal *> proposal,
         
         if (ran.Unif01() <= exp((newval - oldval)/Tt)) // accept
         {
-          if (newval > value_best)
-          {
-            value_best = newval;
-            tree_best = tree->CopyTree();
-          }
-          // counter = 0;
-          nAccept[j]++;
           delete tree_temp;
         } else {
           delete tree;
           tree = tree_temp->CopyTree(); //revert move if accept is not OK
-          // counter++;
-          // if (counter < max_iter) i = (i > 1) ? (i - 1):0;
         }
       } else {
         delete tree;
         tree = tree_temp->CopyTree(); //revert move if size is not OK
-        // counter++;
-        // if (counter < max_iter) i = (i > 1) ? (i - 1):0;
       }
       
       delete delta;
@@ -98,11 +81,5 @@ NodeTree *MCMC::Iterate(NodeTree *tree,std::vector<Proposal *> proposal,
     };
   };
   
-  if (value_best > tree->GetValue()) {
-    delete tree;
-    return tree_best;
-  } else {
-    delete tree_best;
-    return tree;
-  }
+  return tree;
 };

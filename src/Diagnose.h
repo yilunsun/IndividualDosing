@@ -17,7 +17,7 @@ class Diagnose
 {
 public:
 	Diagnose(void);
-	Diagnose(std::vector <NodeTree *> Sample0, Density &density, Model &priorTreeStructure, Model &priorSplitVariable, Model &likelihood, double rate);
+	Diagnose(std::vector <NodeTree *> Sample0, Density &density, Model &priorTreeStructure,Model &priorSplitVariable,Model &likelihood);
 	std::vector <int> GetSizeofTree();
 	virtual ~Diagnose(void);
 
@@ -37,7 +37,7 @@ private:
 	bool Sort(Random &ran);
 
 	std::vector <double> Potential;
-	double rate;
+
 	Node * FindLeaf(Node * node, std::vector <double> &x);
 	Density *like;
 	Model *mPriorStructure;
