@@ -185,11 +185,11 @@ List BayesianCART(NumericMatrix x, // baseline covariate
       Rcout<<"Acceptance rate (%): "<< rate <<endl;
     }
     
-    Diagnose Diag(Sample, dDensity, mTreeStructure, mSplitVariable, mLikelihood);
+    Diagnose Diag(Sample, dDensity, mTreeStructure, mSplitVariable, mLikelihood, rate);
     
     std::string I=std::to_string(l);
     std::string chainname="chain"+I;
-    Result[chainname]=Diag.Scoring(ran, rate);
+    Result[chainname]=Diag.Scoring(ran);
     
     delete tree;
     for (int k=0;k<proposal1.size();k++)

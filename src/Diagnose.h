@@ -17,11 +17,11 @@ class Diagnose
 {
 public:
 	Diagnose(void);
-	Diagnose(std::vector <NodeTree *> Sample0, Density &density, Model &priorTreeStructure, Model &priorSplitVariable, Model &likelihood);
+	Diagnose(std::vector <NodeTree *> Sample0, Density &density, Model &priorTreeStructure, Model &priorSplitVariable, Model &likelihood, double rate);
 	std::vector <int> GetSizeofTree();
 	virtual ~Diagnose(void);
 
-	List Scoring(Random &ran, double rate);
+	List Scoring(Random &ran);
 	std::vector <double> PosteriorPotential(Random &ran);
 	std::vector <std::vector <double> > LogLikelihood(Random &ran);
 	std::vector <std::vector <int> > ImportantCovariates(Random &ran);
@@ -37,7 +37,7 @@ private:
 	bool Sort(Random &ran);
 
 	std::vector <double> Potential;
-	
+	double rate;
 	Node * FindLeaf(Node * node, std::vector <double> &x);
 	Density *like;
 	Model *mPriorStructure;

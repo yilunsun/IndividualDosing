@@ -16,12 +16,13 @@ Diagnose::Diagnose()
   return;
 };
 
-Diagnose::Diagnose(std::vector <NodeTree *> Sample0, Density &density, Model &priorTreeStructure, Model &priorSplitVariable, Model &likelihood)
+Diagnose::Diagnose(std::vector <NodeTree *> Sample0, Density &density, Model &priorTreeStructure, Model &priorSplitVariable, Model &likelihood, double rate)
 {
 	like = density.Copy();
 	mPriorStructure = priorTreeStructure.Copy();
 	mPriorSplit = priorSplitVariable.Copy();
 	mLike = likelihood.Copy();
+  rate = rate;
 	Sample=Sample0;
 };
 
@@ -69,7 +70,7 @@ Diagnose::~Diagnose()
 };
 
 
-List Diagnose::Scoring(Random &ran, const double rate)
+List Diagnose::Scoring(Random &ran)
 {
   std::vector <int> Observees;
   
@@ -111,7 +112,7 @@ List Diagnose::Scoring(Random &ran, const double rate)
                       Named("values")=values,
                       Named("OptTree")=OptTree,
                       Named("label_opt")=label_opt,
-                      Named("rate") = rate);
+                      Named("rate")=this->rate);
 };
 
 
