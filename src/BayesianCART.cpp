@@ -116,25 +116,26 @@ List BayesianCART(NumericMatrix x, // baseline covariate
   NodeTree *tree;
   for (int l = 0; l < nChain; l++) 
   {
-    if (verbose) Rcout<<"Starting Chain #"<<l+1<<endl; 
-    
-    tree = mTreeStructure.Simulate(ran, &obs, 1);
-    tree->SetMinimumLeafSize(MinimumLeafSize);
-    tree->SetAllMinLeaf(MinLeaf);
+    tree = mTreeStructure.Simulate(ran, &obs, MinimumLeafSize);
+    // tree->SetMinimumLeafSize(MinimumLeafSize);
+    // tree->SetAllMinLeaf(MinLeaf);
     mSplitVariable.Simulate(*tree,ran); 
-    tree->SetObservation(&obs);
+    // tree->SetObservation(&obs);
     
     if (verbose) 
     {
+      Rcout<<"Starting Chain #"<<l+1<<endl; 
       Rcout<<"Now checking initial tree."<<endl; 
     }
     
     while (!(tree->UpdateSubjectList() && tree->GetMiniNodeSize() >= MinLeaf)){
-      mSplitVariable.Simulate(*tree,ran);
-      if (tree->UpdateSubjectList()) Rcout<<"UpdateSubjectList successful."<<endl; 
-      Rcout<<"minimum leaf node size is:" <<tree->GetMiniNodeSize()<<endl;
+      delete tree;
+      tree = mTreeStructure.Simulate(ran, &obs, MinimumLeafSize);
+      mSplitVariable.Simulate(*tree,ran); 
     }
-    //tree->checkTree();
+    // tree->SetObservation(&obs);
+    tree->SetMinimumLeafSize(MinimumLeafSize);
+    tree->SetAllMinLeaf(MinLeaf);
     
     if (verbose) {
       Rcout<<"Initial Tree has a minimum node size: "<<tree->GetMiniNodeSize()<<"\n";
